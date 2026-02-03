@@ -98,7 +98,16 @@ export default function SectionSubsections({ sectionId }) {
 
       <div className="py-8">
         <div className="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
-          <a href="/admin/products" className="text-sm underline">← Back</a>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = "/admin/products";
+            }}
+            className="text-sm underline hover:text-black transition text-gray-600 mb-4 inline-block"
+          >
+            ← Back
+          </button>
 
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="font-semibold mb-4">Add Subsection</h3>

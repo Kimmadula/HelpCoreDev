@@ -7,14 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class PageBlock extends Model
 {
     protected $fillable = [
-        'page_id',       
-        'subsection_id',  
+        'subsection_id',
         'type',
         'heading_level',
         'text',
         'image_path',
-        'order_index'
+        'order_index',
+        'align',
+        'image_width',
+        'list_style',
+        'list_items',
     ];
+
+    protected $casts = [
+        'list_items' => 'array',
+    ];
+
 
     public function subsection()
     {

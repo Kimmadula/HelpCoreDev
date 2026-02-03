@@ -137,9 +137,9 @@ export default function ProductSections({ productId }) {
                       <button className="border rounded px-3 py-1 text-sm" onClick={() => startEdit(s)}>Edit</button>
                       <button className="border rounded px-3 py-1 text-sm text-red-600" onClick={() => deleteSection(s.id)}>Delete</button>
 
-                    <a className="border rounded px-3 py-1 text-sm" href={`/admin/sections/${s.id}/subsections`}>
-                      Subsections
-                    </a>
+                      <a className="border rounded px-3 py-1 text-sm" href={`/admin/sections/${s.id}/subsections`}>
+                        Subsections
+                      </a>
                     </div>
                   </div>
                 ))}

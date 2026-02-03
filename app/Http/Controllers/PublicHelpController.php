@@ -69,6 +69,11 @@ class PublicHelpController extends Controller
                     'text' => $b->text,
                     'image_path' => $b->image_path,
                     'order_index' => $b->order_index,
+                    
+                    'align' => $b->align,
+                    'image_width' => $b->image_width,
+                    'list_style' => $b->list_style,
+                    'list_items' => $b->list_items,
                 ];
             })->values(),
         ]);

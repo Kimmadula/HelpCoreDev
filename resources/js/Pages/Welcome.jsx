@@ -170,9 +170,9 @@ export default function MainLanding() {
           <div className="hero-overlay absolute inset-0"></div>
 
           <div className="hero-content relative z-10 text-center max-w-3xl w-full">
-            <h1 
+            <h1
               className="text-5xl md:text-7xl font-extrabold mb-4 text-gray-900"
-              style={{ 
+              style={{
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '-0.03em',
                 textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
@@ -180,7 +180,7 @@ export default function MainLanding() {
             >
               Knowledge Base
             </h1>
-            
+
             <p className="text-lg text-gray-700 mb-10 font-normal">
               Explore and learn more about our products.
             </p>
@@ -188,21 +188,21 @@ export default function MainLanding() {
             {/* Search Bar */}
             <div className="search-container w-full max-w-2xl mx-auto">
               <div className="relative">
-                <svg 
+                <svg
                   className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 z-10"
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                
+
                 <input
                   type="search"
                   value={q}
@@ -220,14 +220,14 @@ export default function MainLanding() {
         </section>
 
         {/* PRODUCTS SECTION */}
-        <section 
+        <section
           className="relative min-h-screen px-8 py-20"
           style={{
             background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 247, 0.9) 100%)'
           }}
         >
           <div className="max-w-6xl mx-auto">
-            <h2 
+            <h2
               className="text-3xl font-bold text-center mb-12 uppercase"
               style={{
                 fontFamily: "'Outfit', sans-serif",
@@ -259,9 +259,9 @@ export default function MainLanding() {
                       <div className="product-icon flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-900">
                         <ProductIcon />
                       </div>
-                      
+
                       <div className="min-w-0">
-                        <div 
+                        <div
                           className="font-semibold text-sm uppercase tracking-wider text-gray-900"
                           style={{ letterSpacing: '0.01em' }}
                         >
@@ -288,7 +288,7 @@ export default function MainLanding() {
                   ISSUE TRACKER
                 </div>
               </div>
-              
+
               <div className="text-xs text-gray-500">
                 © {new Date().getFullYear()} Powered by OranDev Solutions Inc.
               </div>

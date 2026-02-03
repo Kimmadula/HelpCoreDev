@@ -1,4 +1,32 @@
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+
+function alignClass(align) {
+  if (align === "center") return "text-center";
+  if (align === "right") return "text-right";
+  if (align === "justify") return "text-justify";
+  return "text-left";
+}
+
+function imageAlignStyle(align) {
+  if (align === "center") return { display: "block", margin: "0 auto" };
+  if (align === "right") return { display: "block", marginLeft: "auto" };
+  return {};
+}
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function getImageUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/storage/')) return path;
+  return `/storage/${path}`;
+}
 
 function ArticleRenderer({ blocks }) {
   if (!blocks?.length) {
@@ -12,43 +40,95 @@ function ArticleRenderer({ blocks }) {
   return (
     <div className="article-content">
       {blocks.map((b) => {
+        // HEADING
         if (b.type === "heading") {
-          if (b.heading_level === 2) {
-            return (
-              <h2 key={b.id} className="article-h2">
-                {b.text}
-              </h2>
-            );
-          }
+          const cls = alignClass(b.align);
+          const style = { textAlign: b.align };
+
           if (b.heading_level === 3) {
             return (
-              <h3 key={b.id} className="article-h3">
+              <h3 key={b.id} className={`article-h3 ${cls}`} style={style}>
                 {b.text}
               </h3>
             );
           }
           return (
-            <h3 key={b.id} className="article-h3">
+            <h2 key={b.id} className={`article-h2 ${cls}`} style={style}>
               {b.text}
-            </h3>
+            </h2>
           );
         }
 
+        // PARAGRAPH
         if (b.type === "paragraph") {
+          const cls = alignClass(b.align);
+          const ytId = getYouTubeId(b.text?.trim() ?? "");
+
+          if (ytId) {
+            const style = imageAlignStyle(b.align);
+            return (
+              <div key={b.id} className="article-image-wrapper" style={{ ...style, maxWidth: '100%' }}>
+                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${ytId}`}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            );
+          }
+
+          const style = { textAlign: b.align };
+
           return (
-            <p key={b.id} className="article-p">
-              {b.text}
-            </p>
+            <div key={b.id} className={`article-p ${cls}`} style={style}>
+              <ReactMarkdown>{b.text ?? ""}</ReactMarkdown>
+            </div>
           );
         }
 
+        // LIST
+        if (b.type === "list") {
+          const items = Array.isArray(b.list_items) ? b.list_items : [];
+          const cls = alignClass(b.align);
+
+          if (b.list_style === "number") {
+            return (
+              <ol key={b.id} className={`${cls} list-decimal pl-6 mb-4`}>
+                {items.map((it, i) => (
+                  <li key={i}>{it}</li>
+                ))}
+              </ol>
+            );
+          }
+
+          return (
+            <ul key={b.id} className={`${cls} list-disc pl-6 mb-4`}>
+              {items.map((it, i) => (
+                <li key={i}>{it}</li>
+              ))}
+            </ul>
+          );
+        }
+
+        // IMAGE
         if (b.type === "image") {
+          const style = imageAlignStyle(b.align);
+          let maxWidth = "100%";
+          if (b.image_width === "sm") maxWidth = "320px";
+          if (b.image_width === "md") maxWidth = "520px";
+          if (b.image_width === "lg") maxWidth = "760px";
+          if (b.image_width === "full") maxWidth = "100%";
+
           return (
             <div key={b.id} className="article-image-wrapper">
               <img
-                src={b.image_path}
+                src={getImageUrl(b.image_path)}
                 alt=""
-                className="article-image"
+                style={{ ...style, maxWidth, borderRadius: 8 }}
               />
             </div>
           );
@@ -60,8 +140,53 @@ function ArticleRenderer({ blocks }) {
   );
 }
 
-export default function HelpDocs() {
-  const productSlug = "help-desk";
+function CollapsibleSection({ section, activeSubsectionId, onSubsectionClick }) {
+  const hasActiveChild = section.subsections?.some(ss => ss.id === activeSubsectionId);
+  const [isOpen, setIsOpen] = useState(hasActiveChild);
+
+  useEffect(() => {
+    if (hasActiveChild) setIsOpen(true);
+  }, [hasActiveChild]);
+
+  return (
+    <div className="section-group">
+      <button
+        className="w-full flex items-center justify-between text-left group cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="section-title mb-0 group-hover:text-gray-600 transition-colors">
+          {section.title}
+        </div>
+        <svg
+          className={`w-3 h-3 text-gray-400 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="subsection-nav">
+          {section.subsections?.map((ss) => (
+            <button
+              key={ss.id}
+              onClick={() => onSubsectionClick(ss.id)}
+              className={`subsection-btn ${activeSubsectionId === ss.id ? "active" : ""}`}
+            >
+              {ss.title}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function HelpDocs({ productSlug = "help-desk" }) {
   const [nav, setNav] = useState(null);
 
   const [activeSubsectionId, setActiveSubsectionId] = useState(null);
@@ -74,13 +199,12 @@ export default function HelpDocs() {
       .then((r) => r.json())
       .then((data) => {
         setNav(data);
-
         const firstSection = data.sections?.[0];
         const firstSub = firstSection?.subsections?.[0];
         if (firstSub?.id) setActiveSubsectionId(firstSub.id);
       })
       .catch(console.error);
-  }, []);
+  }, [productSlug]);
 
   useEffect(() => {
     if (!activeSubsectionId) return;
@@ -158,12 +282,10 @@ export default function HelpDocs() {
         }
 
         .section-title {
-          font-size: 0.6875rem;
+          font-size: 0.9375rem;
           font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #8a8a8a;
-          margin-bottom: 0.625rem;
+          color: #1a1a1a;
+          /* Margin moved to CollapsibleSection logic */
           padding: 0 0.5rem;
         }
 
@@ -194,7 +316,7 @@ export default function HelpDocs() {
         }
 
         .subsection-btn.active {
-          background: #FF6C00;
+          background: #ff6a00ff;
           color: white;
           font-weight: 500;
           box-shadow: 0 2px 4px rgba(255, 108, 0, 0.15);
@@ -418,7 +540,7 @@ export default function HelpDocs() {
 
       <div className="help-docs-container">
         {/* Mobile Menu Toggle */}
-        <button 
+        <button
           className="mobile-menu-toggle"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
@@ -431,7 +553,7 @@ export default function HelpDocs() {
         </button>
 
         {/* Sidebar Overlay for Mobile */}
-        <div 
+        <div
           className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
           onClick={() => setSidebarOpen(false)}
         ></div>
@@ -440,30 +562,21 @@ export default function HelpDocs() {
         <aside className={`sidebar-nav ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
             <div className="sidebar-logo">
-              <img src="/coreDev.png" alt="coreDev logo" />
+              <a href="/">
+                <img src="/coreDev.png" alt="coreDev logo" />
+              </a>
             </div>
-            <div className="sidebar-brand">coreDev</div>
+            <div className="sidebar-brand">coreDev Solutions Inc.</div>
           </div>
 
           <div className="sidebar-content">
             {nav?.sections?.map((section) => (
-              <div key={section.id} className="section-group">
-                <div className="section-title">{section.title}</div>
-
-                <div className="subsection-nav">
-                  {section.subsections?.map((ss) => (
-                    <button
-                      key={ss.id}
-                      onClick={() => handleSubsectionClick(ss.id)}
-                      className={`subsection-btn ${
-                        activeSubsectionId === ss.id ? "active" : ""
-                      }`}
-                    >
-                      {ss.title}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <CollapsibleSection
+                key={section.id}
+                section={section}
+                activeSubsectionId={activeSubsectionId}
+                onSubsectionClick={handleSubsectionClick}
+              />
             ))}
           </div>
         </aside>

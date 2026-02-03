@@ -25,76 +25,135 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                
+                .login-container {
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                }
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                .fade-in {
+                    animation: fadeIn 0.4s ease-out;
+                }
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
+                .input-focus:focus {
+                    border-color: #FF7A59;
+                    ring-color: rgba(255, 122, 89, 0.1);
+                }
+            `}</style>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+            <div className="login-container w-full max-w-md mx-auto">
+                {/* Status Message */}
+                {status && (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 fade-in">
+                        {status}
+                    </div>
+                )}
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                {/* Form */}
+                <form onSubmit={submit} className="space-y-5 fade-in">
+                    {/* Email Field */}
+                    <div>
+                        <InputLabel
+                            htmlFor="email"
+                            value="Email address"
+                            className="text-sm font-medium text-gray-700 mb-1.5"
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
+                        <TextInput
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            className="input-focus mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition-all focus:outline-none focus:ring-2 focus:ring-orange-100"
+                            autoComplete="username"
+                            isFocused={true}
+                            placeholder="you@example.com"
+                            onChange={(e) => setData('email', e.target.value)}
+                        />
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
+                        <InputError message={errors.email} className="mt-1.5 text-sm" />
+                    </div>
+
+                    {/* Password Field */}
+                    <div>
+                        <InputLabel
+                            htmlFor="password"
+                            value="Password"
+                            className="text-sm font-medium text-gray-700 mb-1.5"
+                        />
+
+                        <TextInput
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={data.password}
+                            className="input-focus mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition-all focus:outline-none focus:ring-2 focus:ring-orange-100"
+                            autoComplete="current-password"
+                            placeholder="••••••••"
+                            onChange={(e) => setData('password', e.target.value)}
+                        />
+
+                        <InputError message={errors.password} className="mt-1.5 text-sm" />
+                    </div>
+
+                    {/* Remember Me & Forgot Password */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <Checkbox
+                                name="remember"
+                                checked={data.remember}
+                                onChange={(e) =>
+                                    setData('remember', e.target.checked)
+                                }
+                                className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">
+                                Keep me signed in
+                            </span>
+                        </div>
+
+                        {canResetPassword && (
+                            <Link
+                                href={route('password.request')}
+                                className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                            >
+                                Forgot password
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Submit Button */}
+                    <PrimaryButton
+                        className="w-full justify-center py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={processing}
+                    >
+                        {processing ? 'Signing in...' : 'Sign in'}
                     </PrimaryButton>
+                </form>
+
+                {/* Footer */}
+                <div className="mt-6 text-center text-sm text-gray-600 fade-in">
+                    Don't have an account?{' '}
+                    <Link
+                        href={route('register')}
+                        className="text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                    >
+                        Create one
+                    </Link>
                 </div>
-            </form>
+            </div>
         </GuestLayout>
     );
 }

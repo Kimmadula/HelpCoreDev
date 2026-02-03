@@ -18,12 +18,22 @@ class PageBlockController extends Controller
 
     public function store(Request $request, Subsection $subsection)
     {
+
         $validated = $request->validate([
-            'type' => ['required', 'in:heading,paragraph,image'],
+            'type' => ['required', 'in:heading,paragraph,image,list'],
+
             'heading_level' => ['nullable', 'in:2,3'],
             'text' => ['nullable', 'string'],
             'image_path' => ['nullable', 'string'],
+
+            'align' => ['nullable', 'in:left,center,right,justify'],
+            'image_width' => ['nullable', 'in:sm,md,lg,full'],
+
+            'list_style' => ['nullable', 'in:bullet,number'],
+            'list_items' => ['nullable', 'array'],
+            'list_items.*' => ['nullable', 'string'],
         ]);
+
 
         if ($validated['type'] === 'heading' && empty($validated['heading_level'])) {
             return response()->json(['message' => 'Heading level is required'], 422);
@@ -37,8 +47,15 @@ class PageBlockController extends Controller
             'heading_level' => $validated['heading_level'] ?? null,
             'text' => $validated['text'] ?? null,
             'image_path' => $validated['image_path'] ?? null,
+
+            'align' => $validated['align'] ?? null,
+            'image_width' => $validated['image_width'] ?? null,
+            'list_style' => $validated['list_style'] ?? null,
+            'list_items' => $validated['list_items'] ?? null,
+
             'order_index' => $maxOrder + 1,
         ]);
+
 
         return response()->json($block, 201);
     }
@@ -49,11 +66,18 @@ class PageBlockController extends Controller
             'heading_level' => ['nullable', 'in:2,3'],
             'text' => ['nullable', 'string'],
             'image_path' => ['nullable', 'string'],
+
+            'align' => ['nullable', 'in:left,center,right'],
+            'image_width' => ['nullable', 'in:sm,md,lg,full'],
+
+            'list_style' => ['nullable', 'in:bullet,number'],
+            'list_items' => ['nullable', 'array'],
+            'list_items.*' => ['nullable', 'string'],
         ]);
 
         $block->update($validated);
-
         return response()->json($block);
+        
     }
 
     public function destroy(PageBlock $block)
