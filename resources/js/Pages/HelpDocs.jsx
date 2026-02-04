@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Head } from "@inertiajs/react";
 import ReactMarkdown from "react-markdown";
 
 function alignClass(align) {
@@ -134,6 +135,18 @@ function ArticleRenderer({ blocks }) {
           );
         }
 
+        // RICH TEXT
+        if (b.type === "richtext") {
+          const cls = alignClass(b.align);
+          return (
+            <div
+              key={b.id}
+              className={`article-richtext ${cls}`}
+              dangerouslySetInnerHTML={{ __html: b.text ?? "" }}
+            />
+          );
+        }
+
         return null;
       })}
     </div>
@@ -224,6 +237,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
   return (
     <>
+      <Head title={nav?.name ? nav.name : "Knowledge Base"} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 
@@ -336,6 +350,10 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
           flex-shrink: 0;
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
           position: relative;
+          display: flex; /* Added flex */
+          align-items: center; /* Center vertically */
+          justify-content: flex-end; /* Align to right */
+          padding: 0 2rem; /* Add padding */
         }
 
         .content-header::after {
@@ -444,6 +462,106 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
           border-radius: 8px;
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
           border: 1px solid #f0f0f0;
+        }
+
+        .article-richtext {
+            margin-bottom: 2rem;
+            color: #4a4a4a;
+        }
+        
+        /* Support for Tiptap text-align */
+        .article-richtext p {
+            margin-bottom: 1.125rem;
+            line-height: 1.75;
+        }
+        
+        .article-richtext p[style*="text-align: center"],
+        .article-richtext .text-center {
+            text-align: center !important;
+        }
+
+        .article-richtext p[style*="text-align: right"],
+        .article-richtext .text-right {
+            text-align: right !important;
+        }
+
+        .article-richtext p[style*="text-align: justify"],
+        .article-richtext .text-justify {
+            text-align: justify !important;
+        }
+
+        .article-richtext img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: inline-block; /* Ensure it respects text-align */
+        }
+        
+        .article-richtext h2 {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .article-richtext h3 {
+             font-family: 'Source Sans 3', sans-serif;
+             font-size: 1.25rem;
+             font-weight: 600;
+             color: #FF6C00;
+             margin-top: 1.5rem;
+             margin-bottom: 0.75rem;
+        }
+
+        .article-richtext ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1.125rem;
+        }
+
+        .article-richtext ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-bottom: 1.125rem;
+        }
+
+        /* Nested List Styles */
+        .article-richtext ul ul {
+            list-style-type: circle;
+            margin-bottom: 0;
+            margin-top: 0.25rem;
+        }
+
+        .article-richtext ul ul ul {
+            list-style-type: square;
+        }
+
+        .article-richtext ol ol {
+            list-style-type: lower-alpha;
+            margin-bottom: 0;
+             margin-top: 0.25rem;
+        }
+
+        .article-richtext ol ol ol {
+            list-style-type: lower-roman;
+        }
+        
+        .article-richtext li {
+            margin-bottom: 0.25rem;
+        }
+
+        .article-richtext strong {
+            font-weight: 700;
+        }
+
+        .article-richtext em {
+            font-style: italic;
+        }
+        
+        .article-richtext u {
+            text-decoration: underline;
         }
 
         /* Mobile Menu Toggle */
@@ -583,7 +701,27 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
         {/* Main Content */}
         <main className="main-content">
-          <div className="content-header"></div>
+          <div className="content-header">
+            <div className="flex items-center gap-2">
+              <select
+                className="bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#FF6C00] focus:border-transparent cursor-pointer hover:bg-white/20 transition"
+                value={nav?.id || ""}
+                onChange={(e) => {
+                  const selectedId = parseInt(e.target.value);
+                  const product = nav?.all_products?.find(p => p.id === selectedId);
+                  if (product) {
+                    window.location.href = `/help/${product.slug}`;
+                  }
+                }}
+              >
+                {nav?.all_products?.map(p => (
+                  <option key={p.id} value={p.id} className="text-gray-900 bg-white">
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="content-body">
             <h1 className="content-title">

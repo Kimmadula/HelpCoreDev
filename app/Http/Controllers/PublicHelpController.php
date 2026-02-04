@@ -7,7 +7,6 @@ use App\Models\Subsection;
 
 class PublicHelpController extends Controller
 {
-    // Sidebar data: Product -> Sections -> Subsections
     public function navigation(string $productSlug)
     {
         $product = Product::query()
@@ -23,10 +22,16 @@ class PublicHelpController extends Controller
             }])
             ->firstOrFail();
 
+        $allProducts = Product::where('is_published', true)
+            ->select('id', 'name', 'slug')
+            ->orderBy('name')
+            ->get();
+
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
+            'all_products' => $allProducts,
             'sections' => $product->sections->map(function ($s) {
                 return [
                     'id' => $s->id,
@@ -45,10 +50,8 @@ class PublicHelpController extends Controller
         ]);
     }
 
-    // Content data: Subsection -> Blocks
     public function subsection(Subsection $subsection)
     {
-        // Optional: only allow published subsections publicly
         if (!$subsection->is_published) {
             abort(404);
         }

@@ -20,7 +20,7 @@ class PageBlockController extends Controller
     {
 
         $validated = $request->validate([
-            'type' => ['required', 'in:heading,paragraph,image,list'],
+            'type' => ['required', 'in:heading,paragraph,image,list,richtext'],
 
             'heading_level' => ['nullable', 'in:2,3'],
             'text' => ['nullable', 'string'],

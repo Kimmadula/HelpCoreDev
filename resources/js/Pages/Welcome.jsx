@@ -91,20 +91,16 @@ export default function MainLanding() {
         }
 
         .hero-gradient {
-          background: linear-gradient(135deg, #FFF4E6 0%, #FFE5CC 25%, #FFB088 50%, #FF8C66 75%, #FF7A59 100%);
+          background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/storage/background.jpg');
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          
         }
 
-        .hero-overlay::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background:
-            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(255, 120, 80, 0.3) 0%, transparent 50%);
-          animation: float 20s ease-in-out infinite;
+        /* Overlay removed as requested */
+        .hero-overlay {
+            display: none;
         }
 
         .hero-content {
@@ -167,21 +163,21 @@ export default function MainLanding() {
       <div className="min-h-screen bg-gray-50 hero-section">
         {/* HERO SECTION */}
         <section className="relative min-h-screen flex flex-col items-center justify-center px-8 py-16 hero-gradient overflow-hidden">
-          <div className="hero-overlay absolute inset-0"></div>
 
           <div className="hero-content relative z-10 text-center max-w-3xl w-full">
             <h1
-              className="text-5xl md:text-7xl font-extrabold mb-4 text-gray-900"
+              className="text-5xl md:text-7xl font-extrabold mb-4"
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '-0.03em',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                color: '#ff6c00'
               }}
             >
               Knowledge Base
             </h1>
 
-            <p className="text-lg text-gray-700 mb-10 font-normal">
+            <p className="text-lg text-white mb-10 font-normal">
               Explore and learn more about our products.
             </p>
 
@@ -217,10 +213,23 @@ export default function MainLanding() {
               </div>
             </div>
           </div>
+          {/* Scroll Down Arrow*/}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex justify-center animate-bounce cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+            onClick={() => {
+              document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12l4 4 4-4" />
+              <path d="M12 8v8" />
+            </svg>
+          </div>
         </section>
 
         {/* PRODUCTS SECTION */}
         <section
+          id="products"
           className="relative min-h-screen px-8 py-20"
           style={{
             background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 247, 0.9) 100%)'

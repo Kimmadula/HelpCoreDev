@@ -37,7 +37,6 @@ class MigratePagesToSubsections extends Command
             $migratedCount = 0;
 
             foreach ($pages as $page) {
-                // Skip if already migrated (blocks already have subsection_id)
                 $hasBlocks = PageBlock::where('page_id', $page->id)->exists();
                 if (!$hasBlocks) {
                     continue;
@@ -46,7 +45,6 @@ class MigratePagesToSubsections extends Command
                 $title = $page->title ?? 'Untitled';
                 $slug = $page->slug ? $page->slug : Str::slug($title);
 
-                // Make slug unique within the same section
                 $baseSlug = $slug ?: Str::slug($title);
                 $slug = $baseSlug;
                 $i = 2;
@@ -56,7 +54,6 @@ class MigratePagesToSubsections extends Command
                     $i++;
                 }
 
-                // Create subsection mirroring the old page
                 if (!$dryRun) {
                     $subsection = Subsection::create([
                         'section_id' => $page->section_id,
@@ -66,7 +63,6 @@ class MigratePagesToSubsections extends Command
                         'is_published' => $page->is_published ?? true,
                     ]);
 
-                    // Move blocks from page_id -> subsection_id
                     PageBlock::where('page_id', $page->id)->update([
                         'subsection_id' => $subsection->id,
                     ]);
