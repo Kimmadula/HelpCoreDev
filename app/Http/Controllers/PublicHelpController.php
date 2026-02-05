@@ -81,4 +81,80 @@ class PublicHelpController extends Controller
             })->values(),
         ]);
     }
+
+    public function search()
+    {
+        $query = request('query');
+        
+        if (!$query) {
+            return response()->json([]);
+        }
+
+        // Search Products
+        $products = Product::where('is_published', true)
+            ->where('name', 'like', "%{$query}%")
+            ->limit(3)
+            ->get(['id', 'name', 'slug'])
+            ->map(function ($p) {
+                return [
+                    'type' => 'product',
+                    'id' => $p->id,
+                    'title' => $p->name,
+                    'url' => "/help/{$p->slug}",
+                ];
+            });
+
+        // Search Sections
+        $sections = \App\Models\Section::where('is_published', true)
+            ->where('title', 'like', "%{$query}%")
+            ->with(['product', 'subsections' => function($q) {
+                $q->where('is_published', true)->orderBy('order_index')->limit(1);
+            }])
+            ->limit(5)
+            ->get()
+            ->map(function ($s) {
+                if (!$s->product) return null;
+                // Link to first subsection if available, else just product page
+                $firstSub = $s->subsections->first();
+                $url = "/help/{$s->product->slug}";
+                if ($firstSub) {
+                    $url .= "?subsection={$firstSub->id}";
+                }
+                
+                return [
+                    'type' => 'section',
+                    'id' => $s->id,
+                    'title' => $s->title,
+                    'product_name' => $s->product->name,
+                    'url' => $url,
+                ];
+            })
+            ->filter()
+            ->values();
+
+        // Search Subsections (Keywords in subsections)
+        $subsections = Subsection::where('is_published', true)
+            ->where('title', 'like', "%{$query}%")
+            ->with(['section.product'])
+            ->limit(10)
+            ->get()
+            ->map(function ($s) {
+                // Ensure we have a valid product to link to
+                if (!$s->section || !$s->section->product) return null;
+                
+                return [
+                    'type' => 'subsection',
+                    'id' => $s->id,
+                    'title' => $s->title,
+                    'product_name' => $s->section->product->name,
+                    'url' => "/help/{$s->section->product->slug}?subsection={$s->id}",
+                ];
+            })
+            ->filter() // Remove nulls
+            ->values();
+
+        return response()->json([
+            'results' => $products->concat($sections)->concat($subsections)
+        ]);
+    }
 }

@@ -29,8 +29,4 @@ class PageBlock extends Model
         return $this->belongsTo(Subsection::class);
     }
 
-    public function page()
-    {
-        return $this->belongsTo(Page::class);
-    }
 }

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\SectionController;
-use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PageBlockController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SubsectionController;
@@ -33,7 +32,7 @@ Route::get('/help/{productSlug}', function (string $productSlug) {
 })->name('help.product');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('admin.products');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -42,17 +41,31 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+use App\Models\Section;
+use App\Models\Subsection;
+
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/products', fn () => Inertia::render('Admin/ProductsIndex'))->name('admin.products');
-    Route::get('/products/{product}/sections', fn ($product) => Inertia::render('Admin/ProductSections', ['productId' => (int)$product]))->name('admin.sections');
 
-    Route::get('/sections/{section}/subsections', fn ($section) =>
-        Inertia::render('Admin/SectionSubsections', ['sectionId' => (int)$section])
-    )->name('admin.subsections');
+    Route::get('/products/{product}/sections', function ($product) {
+        return Inertia::render('Admin/ProductSections', ['productId' => (int)$product]);
+    })->name('admin.sections');
 
-    Route::get('/subsections/{subsection}/edit', fn ($subsection) =>
-        Inertia::render('Admin/SubsectionEditor', ['subsectionId' => (int)$subsection])
-    )->name('admin.subsection.edit');
+    Route::get('/sections/{section}/subsections', function ($sectionId) {
+        $section = Section::findOrFail($sectionId);
+        return Inertia::render('Admin/SectionSubsections', [
+            'sectionId' => (int)$sectionId,
+            'productId' => $section->product_id
+        ]);
+    })->name('admin.subsections');
+
+    Route::get('/subsections/{subsection}/edit', function ($subsectionId) {
+        $subsection = Subsection::findOrFail($subsectionId);
+        return Inertia::render('Admin/SubsectionEditor', [
+            'subsectionId' => (int)$subsectionId,
+            'sectionId' => $subsection->section_id
+        ]);
+    })->name('admin.subsection.edit');
 });
 
 
@@ -85,14 +98,6 @@ Route::middleware(['auth'])->prefix('api/admin')->group(function () {
     Route::put('/subsections/{subsection}/blocks/reorder', [PageBlockController::class, 'reorder']);
 
     Route::post('/uploads/images', [ImageUploadController::class, 'store']);
-
-
-    // Blocks
-    Route::get('/pages/{page}/blocks', [PageBlockController::class, 'index']);
-    Route::post('/pages/{page}/blocks', [PageBlockController::class, 'store']);
-    Route::put('/blocks/{block}', [PageBlockController::class, 'update']);
-    Route::delete('/blocks/{block}', [PageBlockController::class, 'destroy']);
-    Route::put('/pages/{page}/blocks/reorder', [PageBlockController::class, 'reorder']);
 });
 
 require __DIR__.'/auth.php';

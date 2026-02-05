@@ -212,19 +212,9 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
       .then((r) => r.json())
       .then((data) => {
         setNav(data);
-
-        // Check for subsection query param
-        const params = new URLSearchParams(window.location.search);
-        const subsectionId = params.get('subsection');
-
-        if (subsectionId) {
-          setActiveSubsectionId(parseInt(subsectionId));
-        } else {
-          // Default to first subsection
-          const firstSection = data.sections?.[0];
-          const firstSub = firstSection?.subsections?.[0];
-          if (firstSub?.id) setActiveSubsectionId(firstSub.id);
-        }
+        const firstSection = data.sections?.[0];
+        const firstSub = firstSection?.subsections?.[0];
+        if (firstSub?.id) setActiveSubsectionId(firstSub.id);
       })
       .catch(console.error);
   }, [productSlug]);

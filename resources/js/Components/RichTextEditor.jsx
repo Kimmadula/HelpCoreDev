@@ -7,7 +7,23 @@ import Color from '@tiptap/extension-color';
 import textAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 import Image from '@tiptap/extension-image';
+import { Extension } from '@tiptap/core';
 import axios from 'axios';
+
+// Custom Tab Extension that actually works
+const TabExtension = Extension.create({
+    name: 'tabHandler',
+    
+    addKeyboardShortcuts() {
+        return {
+            Tab: () => {
+                // Insert actual tab character or non-breaking spaces
+                this.editor.commands.insertContent('\u00A0\u00A0\u00A0\u00A0');
+                return true; // Prevent default tab behavior
+            },
+        };
+    },
+});
 
 const MenuBar = ({ editor }) => {
     const fileInputRef = useRef(null);
@@ -141,7 +157,7 @@ const MenuBar = ({ editor }) => {
                     title="Bullet List"
                     type="button"
                 >
-                    • List
+                    - List
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -238,6 +254,7 @@ export default function RichTextEditor({ value, onChange }) {
                 inline: true,
                 allowBase64: true,
             }),
+            TabExtension, // Add the custom tab extension
         ],
         content: value,
         editorProps: {
@@ -261,13 +278,14 @@ export default function RichTextEditor({ value, onChange }) {
             <MenuBar editor={editor} />
             <EditorContent editor={editor} />
             <style>{`
-            .ProseMirror p { margin-bottom: 0.5em; }
-            .ProseMirror h2 { margin-top: 1em; margin-bottom: 0.5em; font-weight: bold; font-size: 1.5em; }
-            .ProseMirror h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: bold; font-size: 1.25em; }
-            .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
-            .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
-            .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
-        `}</style>
+                .ProseMirror p { margin-bottom: 0.5em; }
+                .ProseMirror h2 { margin-top: 1em; margin-bottom: 0.5em; font-weight: bold; font-size: 1.5em; }
+                .ProseMirror h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: bold; font-size: 1.25em; }
+                .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
+                .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
+                .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
+                .ProseMirror { white-space: pre-wrap; }
+            `}</style>
         </div>
     );
 }

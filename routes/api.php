@@ -6,6 +6,7 @@ use App\Models\Product;
 
 Route::get('/help/{productSlug}/nav', [PublicHelpController::class, 'navigation']);
 Route::get('/help/subsections/{subsection}', [PublicHelpController::class, 'subsection']);
+Route::get('/help/search', [PublicHelpController::class, 'search']);
 
 Route::get('/help/products', function () {
     return Product::query()

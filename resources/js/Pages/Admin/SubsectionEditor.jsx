@@ -3,7 +3,6 @@ import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import RichTextEditor from "@/Components/RichTextEditor";
-import Modal from "@/Components/Modal"; // Added Modal import
 
 import {
   DndContext,
@@ -24,18 +23,11 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
-// Constants
-const ALIGN_OPTIONS = [
-  { value: 'left', label: 'Left' },
-  { value: 'center', label: 'Center' },
-  { value: 'right', label: 'Right' },
-];
-
 function getImageUrl(path) {
   if (!path) return null;
   if (path.startsWith('http')) return path;
   if (path.startsWith('/storage/')) return path;
-  return `/ storage / ${path} `;
+  return `/storage/${path}`;
 }
 
 function getYouTubeId(url) {
@@ -82,84 +74,146 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
     position: "relative",
   };
 
-  const getSummary = () => {
-    if (block.type === 'heading') return block.text || '(Empty Heading)';
-    if (block.type === 'paragraph') return block.text ? block.text.substring(0, 200) + (block.text.length > 200 ? '...' : '') : '(Empty Paragraph)';
-    if (block.type === 'richtext') return block.text ? block.text.replace(/<[^>]*>?/gm, '').substring(0, 200) + '...' : '(Empty Rich Text)';
-    if (block.type === 'list') return (block.list_items?.length || 0) + ' items';
-    if (block.type === 'image') return block.image_path || '(No Image)';
+  const getBlockTypeIcon = () => {
+    switch (block.type) {
+      case 'heading':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+        );
+      case 'paragraph':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+        );
+      case 'richtext':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        );
+      case 'image':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        );
+      case 'list':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getBlockSummary = () => {
+    if (block.type === 'heading') return block.text || 'Empty Heading';
+    if (block.type === 'paragraph') {
+      const text = block.text || 'Empty Paragraph';
+      return text.length > 60 ? text.substring(0, 60) + '...' : text;
+    }
+    if (block.type === 'richtext') {
+      const stripped = (block.text || '').replace(/<[^>]*>/g, '');
+      return stripped ? (stripped.length > 60 ? stripped.substring(0, 60) + '...' : stripped) : 'Rich Text Block';
+    }
+    if (block.type === 'list') return `${block.list_items?.length || 0} items`;
+    if (block.type === 'image') return block.image_path ? 'Image' : 'No Image';
     return block.type;
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`bg - white border rounded - lg shadow - sm mb - 3 transition - all ${isExpanded ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'} `}>
-      {/* Header / Summary Row */}
-      <div className="flex items-center justify-between p-3 bg-white border-b border-gray-100 rounded-lg select-none hover:bg-gray-50 transition group">
-        <div className="flex items-center gap-4 overflow-hidden">
+    <div ref={setNodeRef} style={style} className={`bg-white rounded-lg border ${isExpanded ? 'border-blue-300 shadow-md' : 'border-gray-200 hover:border-gray-300'} transition-all`}>
+      {/* Header */}
+      <div className="p-4">
+        <div className="flex items-center gap-3">
+          {/* Drag Handle */}
           <button
             type="button"
-            className="text-gray-300 hover:text-gray-600 cursor-grab active:cursor-grabbing px-1"
+            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1"
             {...attributes}
             {...listeners}
           >
-            <span className="text-xl leading-none">⋮⋮</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+            </svg>
           </button>
 
-          <div
-            className="flex flex-col gap-0.5 cursor-pointer flex-1 min-w-0"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <span className="text-sm text-gray-900 font-semibold line-clamp-1">
-              {block.type === 'heading' ? (block.text || 'Empty Heading') :
-                block.type === 'paragraph' ? (block.text || 'Empty Paragraph') :
-                  block.type === 'list' ? `${block.list_items?.length || 0} items list` :
-                    block.type === 'image' ? (block.image_path ? 'Image' : 'No Image') :
-                      (block.text ? block.text.replace(/<[^>]*>?/gm, '').substring(0, 60) + (block.text.length > 60 ? '...' : '') : 'Rich Text Block')}
-            </span>
-
-            {/* Subtle type indicator instead of badge */}
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold opacity-60 group-hover:opacity-100 transition-opacity">
-              {block.type === 'richtext' ? 'Content' : block.type}
-            </span>
-
-            {isDirty && <span className="text-xs text-orange-500 font-bold">• Unsaved</span>}
+          {/* Block Icon & Type */}
+          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
+            {getBlockTypeIcon()}
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
+          {/* Block Info */}
+          <div
+            className="flex-1 min-w-0 cursor-pointer"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-            title={isExpanded ? "Collapse" : "Edit"}
           >
-            {isExpanded ? "▼" : "✎"}
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(block.id)}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-            title="Delete"
-          >
-            ✕
-          </button>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-gray-900 truncate">
+                {getBlockSummary()}
+              </h4>
+              {isDirty && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-orange-100 text-orange-700">
+                  Unsaved
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 capitalize mt-0.5">{block.type}</p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isExpanded ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                )}
+              </svg>
+              {isExpanded ? 'Collapse' : 'Edit'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onDelete(block.id)}
+              className="inline-flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="p-4 border-t bg-white rounded-b-lg space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-
+        <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-4">
+          {/* Alignment Controls (except for richtext) */}
           {block.type !== 'richtext' && (
-            <div className="flex items-center justify-between gap-4">
-              <label className="text-xs font-semibold text-gray-500 uppercase">Alignment</label>
-              <div className="flex bg-gray-100 rounded p-1 gap-1">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alignment</label>
+              <div className="flex gap-2">
                 {['left', 'center', 'right'].map(align => (
                   <button
                     key={align}
                     type="button"
                     onClick={() => onUpdate(block.id, { align })}
-                    className={`p - 1 rounded text - xs px - 2 capitalization ${block.align === align ? 'bg-white shadow text-black font-medium' : 'text-gray-500 hover:text-gray-800'} `}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${block.align === align
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     {align}
                   </button>
@@ -168,161 +222,195 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
             </div>
           )}
 
+          {/* Heading Block */}
           {block.type === "heading" && (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                {[2, 3].map(lvl => (
-                  <button
-                    key={lvl}
-                    onClick={() => { setLocalHeadingLevel(lvl); setIsDirty(true); }}
-                    className={`px - 3 py - 1 text - xs font - bold rounded border ${localHeadingLevel === lvl ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-200'} `}
-                  >H{lvl}</button>
-                ))}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Heading Level</label>
+                <div className="flex gap-2">
+                  {[2, 3].map(lvl => (
+                    <button
+                      key={lvl}
+                      onClick={() => { setLocalHeadingLevel(lvl); setIsDirty(true); }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${localHeadingLevel === lvl
+                          ? 'bg-gray-800 text-white'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      H{lvl}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <input
-                className="border p-2 rounded w-full font-bold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                value={localText}
-                onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
-                placeholder="Heading Text"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Heading Text</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={localText}
+                  onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
+                  placeholder="Enter heading text"
+                />
+              </div>
             </div>
           )}
 
+          {/* Paragraph Block */}
           {block.type === "paragraph" && (
-            <div className="space-y-1">
+            <div className="space-y-3">
               {(() => {
                 const ytId = getYouTubeId(block.text?.trim() ?? "");
                 if (ytId) {
                   return (
-                    <div className="mb-2 rounded-lg overflow-hidden border border-gray-200 bg-gray-900 aspect-video relative group">
-                      <div className="absolute inset-0 z-10 bg-transparent group-hover:bg-black/10 transition pointer-events-none" />
+                    <div className="mb-3 rounded-lg overflow-hidden border border-gray-200 bg-gray-900 aspect-video relative">
                       <iframe
                         src={`https://www.youtube.com/embed/${ytId}`}
                         className="absolute inset-0 w-full h-full"
                         frameBorder="0"
                         allowFullScreen
                       />
-                    </div >
-                  )
+                    </div>
+                  );
                 }
               })()}
-              <textarea
-                className="border p-2 rounded w-full min-h-[120px] text-gray-700 leading-relaxed focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y"
-                value={localText}
-                onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
-                placeholder="Write something..."
-              />
-              <div className="text-[10px] text-gray-400 flex justify-end">Markdown supported</div>
-            </div >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Paragraph Content</label>
+                <textarea
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y min-h-[120px]"
+                  value={localText}
+                  onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
+                  placeholder="Write your content here..."
+                />
+                <p className="text-xs text-gray-500 mt-1">Markdown supported</p>
+              </div>
+            </div>
           )}
 
-          {
-            block.type === "richtext" && (
-              <div className="space-y-1">
-                <RichTextEditor
-                  value={localText}
-                  onChange={(html) => { setLocalText(html); setIsDirty(true); }}
+          {/* Rich Text Block */}
+          {block.type === "richtext" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Rich Text Content</label>
+              <RichTextEditor
+                value={localText}
+                onChange={(html) => { setLocalText(html); setIsDirty(true); }}
+              />
+            </div>
+          )}
+
+          {/* Image Block */}
+          {block.type === "image" && (
+            <div className="space-y-3">
+              {block.image_path && (
+                <div className="rounded-lg border border-gray-200 overflow-hidden bg-gray-50 p-4">
+                  <img
+                    src={getImageUrl(block.image_path)}
+                    className="max-w-full h-auto rounded-lg"
+                    alt="Block image"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image Path</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
+                  value={block.image_path ?? ""}
+                  readOnly
+                  placeholder="Image path"
                 />
               </div>
-            )
-          }
-
-          {
-            block.type === "image" && (
-              <div className="space-y-3">
-                <div className="flex gap-4">
-                  {block.image_path && (
-                    <div className="w-24 h-24 bg-gray-100 rounded border overflow-hidden flex-shrink-0">
-                      <img src={getImageUrl(block.image_path)} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="flex-1 space-y-2">
-                    <input
-                      className="border p-2 rounded w-full text-sm font-mono bg-gray-50"
-                      value={block.image_path ?? ""}
-                      readOnly
-                      placeholder="Image Path"
-                    />
-                    <div className="flex gap-2 text-xs">
-                      <span className="text-gray-500 py-1">Width:</span>
-                      {['sm', 'md', 'lg', 'full'].map(w => (
-                        <button
-                          key={w}
-                          onClick={() => { setLocalImageWidth(w); setIsDirty(true); }}
-                          className={`px-2 py-1 rounded border capitalize ${localImageWidth === w ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-white text-gray-500'}`}
-                        >
-                          {w}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image Width</label>
+                <div className="flex gap-2">
+                  {['sm', 'md', 'lg', 'full'].map(w => (
+                    <button
+                      key={w}
+                      onClick={() => { setLocalImageWidth(w); setIsDirty(true); }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${localImageWidth === w
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      {w}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )
-          }
+            </div>
+          )}
 
-          {
-            block.type === "list" && (
-              <div className="space-y-3">
+          {/* List Block */}
+          {block.type === "list" && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">List Style</label>
                 <div className="flex gap-2">
                   {['bullet', 'number'].map(s => (
                     <button
                       key={s}
                       onClick={() => onUpdate(block.id, { list_style: s })}
-                      className={`px-3 py-1 text-xs rounded border capitalize ${block.list_style === s ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600'}`}
-                    >{s}s</button>
+                      className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${block.list_style === s
+                          ? 'bg-gray-800 text-white'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      {s}s
+                    </button>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">List Items (one per line)</label>
                 <textarea
-                  className="border p-2 rounded w-full min-h-[150px] font-mono text-sm bg-gray-50 focus:bg-white transition"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm resize-y min-h-[150px]"
                   value={Array.isArray(block.list_items) ? block.list_items.join("\n") : (block.list_items ?? "")}
                   onChange={(e) => onUpdate(block.id, { list_items: e.target.value.split("\n") })}
-                  placeholder="List items..."
+                  placeholder="Enter list items..."
                 />
               </div>
-            )
-          }
+            </div>
+          )}
 
-          {/* SAVE BUTTON */}
-          <div className="flex justify-end pt-2">
+          {/* Save Button */}
+          <div className="flex justify-end pt-2 border-t border-gray-100">
             <button
               type="button"
               onClick={handleSave}
               disabled={!isDirty || isSaving}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${isDirty
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              className={`inline-flex items-center px-6 py-2.5 rounded-lg font-medium text-sm transition-all ${isDirty
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Save Changes
+                </>
+              )}
             </button>
           </div>
-
-        </div >
+        </div>
       )}
-    </div >
+    </div>
   );
 }
 
-export default function SubsectionEditor({ subsectionId }) {
+export default function SubsectionEditor({ subsectionId, sectionId }) {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // Tabbed interface state
-  const [activeTab, setActiveTab] = useState("richtext");
-
-  const [headingLevel, setHeadingLevel] = useState(2);
-  const [text, setText] = useState("");
-  const [imageFile, setImageFile] = useState(null);
-  const [align, setAlign] = useState("left");
-  const [imageWidth, setImageWidth] = useState("md");
-  const [listStyle, setListStyle] = useState("bullet");
-  const [listText, setListText] = useState("");
   const [richTextContent, setRichTextContent] = useState("");
-
 
   const loadBlocks = async () => {
     setLoading(true);
@@ -369,57 +457,22 @@ export default function SubsectionEditor({ subsectionId }) {
   const createBlock = async (e) => {
     e.preventDefault();
 
-    let payload = { type: activeTab, align };
-
-
-
-    if (activeTab === "list") {
-      const items = listText.split("\n").map((s) => s.trim()).filter(Boolean);
-      if (items.length === 0) {
-        alert("Please add at least one list item.");
-        return;
-      }
-      payload.list_style = listStyle;
-      payload.list_items = items;
+    const stripped = richTextContent.replace(/<[^>]*>/g, '').trim();
+    if (!stripped && !richTextContent.includes('<img') && !richTextContent.includes('<iframe')) {
+      alert("Please enter some content.");
+      return;
     }
 
-    if (activeTab === "heading") {
-      if (!text.trim()) {
-        alert("Please enter heading text.");
-        return;
-      }
-      payload.heading_level = headingLevel;
-      payload.text = text;
-    }
+    await axios.post(`/api/admin/subsections/${subsectionId}/blocks`, {
+      type: 'richtext',
+      text: richTextContent,
+      align: 'left'
+    });
 
-    if (activeTab === "paragraph") {
-      if (!text.trim()) {
-        alert("Please enter paragraph text.");
-        return;
-      }
-      payload.text = text;
-    }
-
-    if (activeTab === "richtext") {
-      // Basic check for empty HTML (stripping tags) or zero-width spaces
-      const stripped = richTextContent.replace(/<[^>]*>/g, '').trim();
-      if (!stripped && !richTextContent.includes('<img') && !richTextContent.includes('<iframe')) {
-        alert("Please enter some content.");
-        return;
-      }
-      payload.text = richTextContent;
-    }
-
-    await axios.post(`/api/admin/subsections/${subsectionId}/blocks`, payload);
-
-    setText("");
-    setImageFile(null);
-    setListText("");
     setRichTextContent("");
-    setShowAddModal(false); // Close modal on success
+    setShowAddModal(false);
     await loadBlocks();
 
-    // Auto-scroll to bottom
     setTimeout(() => {
       const bottom = document.getElementById("bottom-of-blocks");
       if (bottom) {
@@ -439,141 +492,176 @@ export default function SubsectionEditor({ subsectionId }) {
     await loadBlocks();
   };
 
-
-
   return (
     <AuthenticatedLayout
       header={
-        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-          Admin • Subsection Content
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+            Content Editor
+          </h2>
+          <button
+            onClick={loadBlocks}
+            disabled={loading}
+            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
       }
     >
       <Head title="Subsection Editor" />
 
-      <Modal show={showAddModal} onClose={() => setShowAddModal(false)} maxWidth="2xl">
-        <div className="bg-white rounded-xl overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-gray-800 text-lg">Add New Block</h3>
-            <button
-              type="button"
-              onClick={() => setShowAddModal(false)}
-              className="text-gray-400 hover:text-gray-600 text-xl font-bold"
-            >✕</button>
-          </div>
-
-          <form onSubmit={createBlock} className="p-6 space-y-5">
-            <div className="space-y-1 animate-in slide-in-from-right-2 duration-200">
-              <div className="mb-2">
-                <label className="text-xs font-bold text-gray-400 uppercase">Content (Rich Text)</label>
-              </div>
-              <RichTextEditor
-                value={richTextContent}
-                onChange={setRichTextContent}
-              />
-            </div>
-
-            <div className="flex gap-3 justify-end pt-4">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-5 py-2.5 rounded-xl font-semibold text-gray-500 hover:bg-gray-100 transition"
-              >
-                Cancel
-              </button>
-              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-200 transition transform active:scale-95">
-                Add Block
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
       <div className="py-8">
-        <div className="max-w-[95%] mx-auto sm:px-6 lg:px-8 space-y-6">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              if (window.history.length > 1) window.history.back();
-              else window.location.href = "/admin/products";
-            }}
-            className="text-sm underline mb-4 inline-block text-gray-500 hover:text-black transition"
-          >
-            ← Back
-          </button>
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="space-y-6">
+            {/* Back Navigation */}
+            <div>
+              <a
+                href={`/admin/sections/${sectionId}/subsections`}
+                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </a>
+            </div>
 
-          {/* Layout: Content Blocks List */}
-          <div className="space-y-12">
+            {/* Content Blocks Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Content Blocks</h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {loading ? "Loading..." : `${blocks.length} block${blocks.length !== 1 ? 's' : ''} total`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Block
+                </button>
+              </div>
 
-            {/* 1. Add Block Form */}
-            {/* Moved to Modal */}
-
-            {/* 2. Blocks List */}
-            <div className="max-w-5xl mx-auto w-full">
-              <div className="bg-white/50 backdrop-blur-sm rounded-xl">
-                <div className="flex items-center justify-between mb-4 px-2">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-bold text-lg text-gray-800">Content Blocks</h3>
-                    <span className="text-xs text-gray-500 bg-white border px-2 py-0.5 rounded-full">{blocks.length}</span>
-                  </div>
-
+              {loading ? (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
+                  <p className="mt-4 text-gray-600">Loading content...</p>
+                </div>
+              ) : blocks.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h4 className="mt-4 text-lg font-medium text-gray-900">No content blocks yet</h4>
+                  <p className="mt-2 text-sm text-gray-600">Get started by adding your first content block.</p>
                   <button
                     type="button"
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition shadow-lg shadow-gray-200"
+                    className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <span className="text-xl leading-none font-bold">+</span>
-                    <span className="text-sm font-bold">Add Block</span>
+                    Add Your First Block
                   </button>
-
                 </div>
-
-                {loading ? (
-                  <div className="p-8 text-center text-gray-400">Loading content...</div>
-                ) : blocks.length === 0 ? (
-                  <div className="p-12 border-2 border-dashed border-gray-200 rounded-xl text-center">
-                    <p className="text-gray-400 mb-2">This subsection is empty.</p>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddModal(true)}
-                      className="text-blue-600 font-bold hover:underline"
-                    >
-                      Create your first block
-                    </button>
-                  </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={blocks.map((b) => b.id)}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <SortableContext
-                      items={blocks.map((b) => b.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-2">
-                        {blocks.map((b) => (
-                          <SortableBlockItem
-                            key={b.id}
-                            block={b}
-                            onDelete={deleteBlock}
-                            onUpdate={updateBlock}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                )}
-                {/* Invisible element to scroll to */}
-                <div id="bottom-of-blocks" className="h-4"></div>
-              </div>
+                    <div className="space-y-3">
+                      {blocks.map((b) => (
+                        <SortableBlockItem
+                          key={b.id}
+                          block={b}
+                          onDelete={deleteBlock}
+                          onUpdate={updateBlock}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
+              <div id="bottom-of-blocks" className="h-4"></div>
             </div>
-
           </div>
-
         </div>
       </div>
+
+      {/* Add Block Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowAddModal(false)}></div>
+
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden transform transition-all">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-xl font-bold text-white">Add New Block</h3>
+                      <p className="text-sm text-blue-100 mt-0.5">Create rich text content</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowAddModal(false)} className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={createBlock} className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                    <RichTextEditor
+                      value={richTextContent}
+                      onChange={setRichTextContent}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Block
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthenticatedLayout>
   );
 }
