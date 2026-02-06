@@ -9,11 +9,12 @@ import Youtube from '@tiptap/extension-youtube';
 import Image from '@tiptap/extension-image';
 import { Extension } from '@tiptap/core';
 import axios from 'axios';
+import Link from '@tiptap/extension-link';
 
 // Custom Tab Extension that actually works
 const TabExtension = Extension.create({
     name: 'tabHandler',
-    
+
     addKeyboardShortcuts() {
         return {
             Tab: () => {
@@ -84,7 +85,7 @@ const MenuBar = ({ editor }) => {
         }`;
 
     return (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white rounded-t-lg sticky top-0 z-20">
             {/* Hidden File Input */}
             <input
                 type="file"
@@ -157,7 +158,7 @@ const MenuBar = ({ editor }) => {
                     title="Bullet List"
                     type="button"
                 >
-                    - List
+                    • List
                 </button>
                 <button
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -254,6 +255,10 @@ export default function RichTextEditor({ value, onChange }) {
                 inline: true,
                 allowBase64: true,
             }),
+            Link.configure({
+                openOnClick: false,
+                autolink: true,
+            }),
             TabExtension, // Add the custom tab extension
         ],
         content: value,
@@ -284,6 +289,7 @@ export default function RichTextEditor({ value, onChange }) {
                 .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
                 .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
                 .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
+                .ProseMirror a { color: #2563eb; text-decoration: underline; cursor: pointer; }
                 .ProseMirror { white-space: pre-wrap; }
             `}</style>
         </div>

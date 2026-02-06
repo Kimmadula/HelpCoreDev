@@ -11,7 +11,7 @@ Route::get('/help/search', [PublicHelpController::class, 'search']);
 Route::get('/help/products', function () {
     return Product::query()
         ->where('is_published', true)
-        ->orderBy('name')
+        ->orderBy('created_at', 'asc')
         ->get(['id', 'name', 'slug']);
 });
 

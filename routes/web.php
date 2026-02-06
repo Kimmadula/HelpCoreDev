@@ -22,11 +22,11 @@ Route::get('/', function () {
 });
 
 Route::get('/help-desk', function () {
-    return Inertia::render('HelpDocs');
+    return Inertia::render('Article');
 })->name('help');
 
 Route::get('/help/{productSlug}', function (string $productSlug) {
-    return Inertia::render('HelpDocs', [
+    return Inertia::render('Article', [
         'productSlug' => $productSlug,
     ]);
 })->name('help.product');
@@ -48,22 +48,35 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/products', fn () => Inertia::render('Admin/ProductsIndex'))->name('admin.products');
 
     Route::get('/products/{product}/sections', function ($product) {
-        return Inertia::render('Admin/ProductSections', ['productId' => (int)$product]);
+        $productModel = \App\Models\Product::findOrFail($product);
+        return Inertia::render('Admin/ProductSections', [
+            'productId' => (int)$product,
+            'productTitle' => $productModel->name
+        ]);
     })->name('admin.sections');
 
     Route::get('/sections/{section}/subsections', function ($sectionId) {
         $section = Section::findOrFail($sectionId);
+        $product = $section->product;
         return Inertia::render('Admin/SectionSubsections', [
             'sectionId' => (int)$sectionId,
-            'productId' => $section->product_id
+            'productId' => $section->product_id,
+            'sectionTitle' => $section->title,
+            'productTitle' => $product->name
         ]);
     })->name('admin.subsections');
 
     Route::get('/subsections/{subsection}/edit', function ($subsectionId) {
         $subsection = Subsection::findOrFail($subsectionId);
+        $section = $subsection->section;
+        $product = $section->product;
+
         return Inertia::render('Admin/SubsectionEditor', [
             'subsectionId' => (int)$subsectionId,
-            'sectionId' => $subsection->section_id
+            'sectionId' => $subsection->section_id,
+            'subsectionTitle' => $subsection->title,
+            'sectionTitle' => $section->title,
+            'productTitle' => $product->name,
         ]);
     })->name('admin.subsection.edit');
 });

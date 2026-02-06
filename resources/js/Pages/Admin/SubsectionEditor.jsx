@@ -37,7 +37,7 @@ function getYouTubeId(url) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-function SortableBlockItem({ block, onDelete, onUpdate }) {
+function SortableBlockItem({ block, onDelete, onUpdate, subsectionTitle }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: block.id });
 
@@ -155,7 +155,7 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
           >
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-semibold text-gray-900 truncate">
-                {getBlockSummary()}
+                {subsectionTitle}
               </h4>
               {isDirty && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-orange-100 text-orange-700">
@@ -163,7 +163,6 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 capitalize mt-0.5">{block.type}</p>
           </div>
 
           {/* Actions */}
@@ -211,8 +210,8 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
                     type="button"
                     onClick={() => onUpdate(block.id, { align })}
                     className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${block.align === align
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                   >
                     {align}
@@ -233,8 +232,8 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
                       key={lvl}
                       onClick={() => { setLocalHeadingLevel(lvl); setIsDirty(true); }}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${localHeadingLevel === lvl
-                          ? 'bg-gray-800 text-white'
-                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                       H{lvl}
@@ -289,7 +288,6 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
           {/* Rich Text Block */}
           {block.type === "richtext" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Rich Text Content</label>
               <RichTextEditor
                 value={localText}
                 onChange={(html) => { setLocalText(html); setIsDirty(true); }}
@@ -327,8 +325,8 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
                       key={w}
                       onClick={() => { setLocalImageWidth(w); setIsDirty(true); }}
                       className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${localImageWidth === w
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                       {w}
@@ -350,8 +348,8 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
                       key={s}
                       onClick={() => onUpdate(block.id, { list_style: s })}
                       className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${block.list_style === s
-                          ? 'bg-gray-800 text-white'
-                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                       {s}s
@@ -378,8 +376,8 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
               onClick={handleSave}
               disabled={!isDirty || isSaving}
               className={`inline-flex items-center px-6 py-2.5 rounded-lg font-medium text-sm transition-all ${isDirty
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
             >
               {isSaving ? (
@@ -406,7 +404,7 @@ function SortableBlockItem({ block, onDelete, onUpdate }) {
   );
 }
 
-export default function SubsectionEditor({ subsectionId, sectionId }) {
+export default function SubsectionEditor({ subsectionId, sectionId, subsectionTitle, sectionTitle, productTitle }) {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -495,20 +493,20 @@ export default function SubsectionEditor({ subsectionId, sectionId }) {
   return (
     <AuthenticatedLayout
       header={
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-            Content Editor
-          </h2>
-          <button
-            onClick={loadBlocks}
-            disabled={loading}
-            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </button>
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <a href="/admin/products" className="text-gray-500 hover:text-blue-600 transition-colors">
+            {productTitle}
+          </a>
+          <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <a href={`/admin/sections/${sectionId}/subsections`} className="text-gray-500 hover:text-blue-600 transition-colors">
+            {sectionTitle}
+          </a>
+          <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <span className="text-gray-900 font-semibold">{subsectionTitle}</span>
         </div>
       }
     >
@@ -517,100 +515,90 @@ export default function SubsectionEditor({ subsectionId, sectionId }) {
       <div className="py-8">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
-            {/* Back Navigation */}
-            <div>
-              <a
-                href={`/admin/sections/${sectionId}/subsections`}
-                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Content Blocks</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  {loading ? "Loading..." : `${blocks.length} block${blocks.length !== 1 ? 's' : ''} total`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
               >
-                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Back
-              </a>
+                Add Block
+              </button>
             </div>
 
-            {/* Content Blocks Section */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Content Blocks</h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {loading ? "Loading..." : `${blocks.length} block${blocks.length !== 1 ? 's' : ''} total`}
-                  </p>
-                </div>
+            {loading ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
+                <p className="mt-4 text-gray-600">Loading content...</p>
+              </div>
+            ) : blocks.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h4 className="mt-4 text-lg font-medium text-gray-900">No content blocks yet</h4>
+                <p className="mt-2 text-sm text-gray-600">Get started by adding your first content block.</p>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(true)}
-                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add Block
+                  Add Your First Block
                 </button>
               </div>
-
-              {loading ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
-                  <p className="mt-4 text-gray-600">Loading content...</p>
-                </div>
-              ) : blocks.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <h4 className="mt-4 text-lg font-medium text-gray-900">No content blocks yet</h4>
-                  <p className="mt-2 text-sm text-gray-600">Get started by adding your first content block.</p>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(true)}
-                    className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Add Your First Block
-                  </button>
-                </div>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={blocks.map((b) => b.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <SortableContext
-                    items={blocks.map((b) => b.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-3">
-                      {blocks.map((b) => (
-                        <SortableBlockItem
-                          key={b.id}
-                          block={b}
-                          onDelete={deleteBlock}
-                          onUpdate={updateBlock}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-              <div id="bottom-of-blocks" className="h-4"></div>
-            </div>
+                  <div className="space-y-3">
+                    {blocks.map((b) => (
+                      <SortableBlockItem
+                        key={b.id}
+                        block={b}
+                        onDelete={deleteBlock}
+                        onUpdate={updateBlock}
+                        subsectionTitle={subsectionTitle}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+            <div id="bottom-of-blocks" className="h-4"></div>
           </div>
         </div>
       </div>
 
-      {/* Add Block Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowAddModal(false)}></div>
 
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden transform transition-all">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-5">
+      {/* Add Block Modal */}
+      {
+        showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            {/* Backdrop */}
+            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={() => setShowAddModal(false)}></div>
+
+            {/* Modal Panel */}
+            <div className="relative w-full max-w-4xl max-h-[85vh] bg-white rounded-xl shadow-xl flex flex-col overflow-hidden transform transition-all">
+
+              {/* Header */}
+              <div className="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <div className="bg-white bg-opacity-20 rounded-lg p-2 mr-4">
                       <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
@@ -628,40 +616,45 @@ export default function SubsectionEditor({ subsectionId, sectionId }) {
                 </div>
               </div>
 
-              <form onSubmit={createBlock} className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-                    <RichTextEditor
-                      value={richTextContent}
-                      onChange={setRichTextContent}
-                    />
+              {/* Body (Scrollable) */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <form onSubmit={createBlock}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                      <RichTextEditor
+                        value={richTextContent}
+                        onChange={setRichTextContent}
+                      />
+                    </div>
                   </div>
-                </div>
+                </form>
+              </div>
 
-                <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Block
-                  </button>
-                </div>
-              </form>
+              {/* Footer */}
+              <div className="flex-shrink-0 flex gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={createBlock}
+                  className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Block
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </AuthenticatedLayout>
+        )
+      }
+    </AuthenticatedLayout >
   );
 }

@@ -127,27 +127,6 @@ export default function ProductsIndex() {
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">
             Products Management
           </h2>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create New Product
-            </button>
-            <button
-              onClick={loadProducts}
-              disabled={loading}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-              title="Refresh"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
         </div>
       }
     >
@@ -176,7 +155,7 @@ export default function ProductsIndex() {
                             </svg>
                           </div>
                           <div className="ml-4">
-                            <h3 className="text-xl font-bold text-white">Create New Product</h3>
+                            <h3 className="text-xl font-bold text-white">Create Product</h3>
                             <p className="text-sm text-blue-100 mt-0.5">Add a new product to your catalog</p>
                           </div>
                         </div>
@@ -264,11 +243,23 @@ export default function ProductsIndex() {
 
             {/* Products Grid */}
             <div>
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">All Products</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  {loading ? "Loading..." : `${products.length} product${products.length !== 1 ? 's' : ''} total`}
-                </p>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">All Products</h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {loading ? "Loading..." : `${products.length} product${products.length !== 1 ? 's' : ''} total`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create Product
+                </button>
               </div>
 
               {loading ? (
@@ -331,7 +322,7 @@ export default function ProductsIndex() {
                           <div className="grid grid-cols-2 gap-2">
                             <button
                               onClick={() => startEdit(p)}
-                              className="inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                              className="inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                               <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

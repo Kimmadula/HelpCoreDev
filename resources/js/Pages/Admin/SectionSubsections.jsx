@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export default function SectionSubsections({ sectionId, productId }) {
+export default function SectionSubsections({ sectionId, productId, sectionTitle, productTitle }) {
   const [subsections, setSubsections] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -104,10 +104,20 @@ export default function SectionSubsections({ sectionId, productId }) {
   return (
     <AuthenticatedLayout
       header={
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-            Admin • Edit Subsections
-          </h2>
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <a href="/admin/products" className="text-gray-500 hover:text-blue-600 transition-colors">
+            {productTitle}
+          </a>
+          <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <a href={`/admin/products/${productId}/sections`} className="text-gray-500 hover:text-blue-600 transition-colors">
+            {sectionTitle}
+          </a>
+          <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <span className="text-gray-900 font-semibold">Subsections</span>
         </div>
       }
     >
@@ -130,17 +140,7 @@ export default function SectionSubsections({ sectionId, productId }) {
             </div>
 
             {/* Create Subsection Button (replaces inline form) */}
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Create New Subsection
-              </button>
-            </div>
+
 
             {/* Create Modal */}
             {showCreateModal && (
@@ -158,7 +158,7 @@ export default function SectionSubsections({ sectionId, productId }) {
                             </svg>
                           </div>
                           <div className="ml-4">
-                            <h3 className="text-xl font-bold text-white">Create New Subsection</h3>
+                            <h3 className="text-xl font-bold text-white">Create Subsection</h3>
                             <p className="text-sm text-blue-100 mt-0.5">Add a new subsection to this section</p>
                           </div>
                         </div>
@@ -230,11 +230,22 @@ export default function SectionSubsections({ sectionId, productId }) {
 
             {/* Subsections List */}
             <div>
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">All Subsections</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  {loading ? "Loading..." : `${subsections.length} subsection${subsections.length !== 1 ? 's' : ''} total`}
-                </p>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">All Subsections</h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {loading ? "Loading..." : `${subsections.length} subsection${subsections.length !== 1 ? 's' : ''} total`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create Subsection
+                </button>
               </div>
 
               {loading ? (
@@ -309,7 +320,7 @@ export default function SectionSubsections({ sectionId, productId }) {
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <a
                               href={`/admin/subsections/${s.id}/edit`}
-                              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                               <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

@@ -339,9 +339,7 @@ export default function MainLanding() {
                       href={`/help/${p.slug}`}
                       className="product-card relative flex items-center gap-4 p-6 rounded-xl shadow-sm cursor-pointer"
                     >
-                      <div className="product-icon flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-900">
-                        <ProductIcon />
-                      </div>
+
 
                       <div className="min-w-0">
                         <div

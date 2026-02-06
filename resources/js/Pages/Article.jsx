@@ -68,7 +68,7 @@ function ArticleRenderer({ blocks }) {
           if (ytId) {
             const style = imageAlignStyle(b.align);
             return (
-              <div key={b.id} className="article-image-wrapper" style={{ ...style, maxWidth: '100%' }}>
+              <div key={b.id} className="article-image-wrapper" style={{ ...style, maxWidth: '640px' }}>
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
                   <iframe
                     src={`https://www.youtube.com/embed/${ytId}`}
@@ -518,13 +518,13 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         .article-richtext ul {
             list-style-type: disc;
             padding-left: 1.5rem;
-            margin-bottom: 1.125rem;
+            margin-bottom: 1rem;
         }
 
         .article-richtext ol {
             list-style-type: decimal;
             padding-left: 1.5rem;
-            margin-bottom: 1.125rem;
+            margin-bottom: 0.5rem;
         }
 
         /* Nested List Styles */
@@ -549,7 +549,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         }
         
         .article-richtext li {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.125rem;
         }
 
         .article-richtext strong {
@@ -562,6 +562,12 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         
         .article-richtext u {
             text-decoration: underline;
+        }
+
+        .article-richtext a {
+            color: #2563eb;
+            text-decoration: underline;
+            cursor: pointer;
         }
 
         /* Mobile Menu Toggle */

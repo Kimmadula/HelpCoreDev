@@ -24,7 +24,7 @@ class PublicHelpController extends Controller
 
         $allProducts = Product::where('is_published', true)
             ->select('id', 'name', 'slug')
-            ->orderBy('name')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json([
