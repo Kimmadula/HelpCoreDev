@@ -130,7 +130,7 @@ export default function ProductsIndex() {
         </div>
       }
     >
-      <Head title="Admin Products" />
+      <Head title="Products" />
 
       <div className="py-8">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -245,7 +245,7 @@ export default function ProductsIndex() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">All Products</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Products</h3>
                   <p className="mt-1 text-sm text-gray-600">
                     {loading ? "Loading..." : `${products.length} product${products.length !== 1 ? 's' : ''} total`}
                   </p>

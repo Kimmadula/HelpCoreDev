@@ -510,14 +510,14 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
         </div>
       }
     >
-      <Head title="Subsection Editor" />
+      <Head title="Article" />
 
       <div className="py-8">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Content Blocks</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Article Blocks</h3>
                 <p className="mt-1 text-sm text-gray-600">
                   {loading ? "Loading..." : `${blocks.length} block${blocks.length !== 1 ? 's' : ''} total`}
                 </p>

@@ -107,7 +107,7 @@ export default function ProductSections({ productId, productTitle }) {
       header={
         <div className="flex items-center gap-2 text-sm font-medium">
           <a href="/admin/products" className="text-gray-500 hover:text-blue-600 transition-colors">
-            All Products
+            Products
           </a>
           <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -116,7 +116,7 @@ export default function ProductSections({ productId, productTitle }) {
         </div>
       }
     >
-      <Head title="Admin Sections" />
+      <Head title="Sections" />
 
       <div className="py-8">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">

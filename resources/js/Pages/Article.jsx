@@ -345,15 +345,16 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         }
 
         .content-header {
-          background: linear-gradient(135deg, #595755 0%, #6d6b69 50%, #595755 100%);
+          /* background: linear-gradient(135deg, #595755 0%, #6d6b69 50%, #595755 100%); */
+          background-color: #353635;
           height: 60px;
           flex-shrink: 0;
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
           position: relative;
-          display: flex; /* Added flex */
-          align-items: center; /* Center vertically */
-          justify-content: flex-end; /* Align to right */
-          padding: 0 2rem; /* Add padding */
+          display: flex; 
+          align-items: center; 
+          justify-content: flex-end; 
+          padding: 0 2rem; 
         }
 
         .content-header::after {
@@ -414,30 +415,8 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
           font-weight: 400;
         }
 
-        .article-h2 {
-          font-family: 'Source Sans 3', sans-serif;
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #1a1a1a;
-          margin-top: 2.5rem;
-          margin-bottom: 1rem;
-          letter-spacing: -0.01em;
-          padding-bottom: 0.5rem;
-          border-bottom: 2px solid #f0f0f0;
-        }
-
         .article-h2:first-child {
           margin-top: 0;
-        }
-
-        .article-h3 {
-          font-family: 'Source Sans 3', sans-serif;
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #FF6C00;
-          margin-top: 2rem;
-          margin-bottom: 0.75rem;
-          letter-spacing: -0.01em;
         }
 
         .article-p {
@@ -467,6 +446,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         .article-richtext {
             margin-bottom: 2rem;
             color: #4a4a4a;
+            white-space: pre-wrap;
         }
         
         /* Support for Tiptap text-align */
@@ -510,7 +490,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
              font-family: 'Source Sans 3', sans-serif;
              font-size: 1.25rem;
              font-weight: 600;
-             color: #FF6C00;
+             color: #1a1a1a;
              margin-top: 1.5rem;
              margin-bottom: 0.75rem;
         }
@@ -690,7 +670,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
                 <img src="/coreDev.png" alt="coreDev logo" />
               </a>
             </div>
-            <div className="sidebar-brand">coreDev Solutions Inc.</div>
+            <div className="sidebar-brand">Knowledge Base</div>
           </div>
 
           <div className="sidebar-content">
@@ -743,6 +723,33 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
               <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
             )}
           </div>
+
+        {/* FOOTER */}
+        <footer className="bg-[#353635] border-t border-gray-300">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex flex-wrap justify-between items-center gap-8">
+              <div className="flex gap-12 text-sm text-white">
+                <div className="cursor-pointer transition-colors">
+                  HELP DESK
+                </div>
+                <div className="cursor-pointer transition-colors">
+                  ISSUE TRACKER
+                </div>
+              </div>
+
+              <div className="text-s text-white">
+                © {new Date().getFullYear()} Powered by <img src="/coreDevlogo.png" alt="o" style={{ width: '1em', height: '1em', verticalAlign: 'middle', display: 'inline-block', margin: '0 2px' }} />
+                <a
+                  href="https://coredev.ph/"
+                  target="_blank"
+                  className="text-[#51bcda] hover:opacity-80">
+                  coredev Solutions Inc.
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
+
         </main>
       </div>
     </>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Section;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
 {
@@ -69,9 +70,11 @@ class SectionController extends Controller
             }
         }
 
-        foreach ($validated['ordered_ids'] as $index => $id) {
-            Section::where('id', $id)->update(['order_index' => $index + 1]);
-        }
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['ordered_ids'] as $index => $id) {
+                Section::where('id', $id)->update(['order_index' => $index + 1]);
+            }
+        });
 
         return response()->json(['message' => 'Reordered']);
     }

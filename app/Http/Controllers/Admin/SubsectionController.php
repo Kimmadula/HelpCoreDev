@@ -7,6 +7,7 @@ use App\Models\Section;
 use App\Models\Subsection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class SubsectionController extends Controller
 {
@@ -26,25 +27,32 @@ class SubsectionController extends Controller
         ]);
 
         $slug = $validated['slug'] ?? Str::slug($validated['title']);
-        $baseSlug = $slug;
+        $originalSlug = $slug;
         $i = 2;
 
-        while (Subsection::where('section_id', $section->id)->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $i;
-            $i++;
+        while (true) {
+            try {
+                $maxOrder = $section->subsections()->max('order_index') ?? 0;
+
+                $subsection = Subsection::create([
+                    'section_id' => $section->id,
+                    'title' => $validated['title'],
+                    'slug' => $slug,
+                    'order_index' => $maxOrder + 1,
+                    'is_published' => $validated['is_published'] ?? true,
+                ]);
+
+                return response()->json($subsection, 201);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // MySQL error code for duplicate entry is 1062
+                if (($e->errorInfo[1] ?? 0) == 1062) {
+                    $slug = $originalSlug . '-' . $i;
+                    $i++;
+                    continue;
+                }
+                throw $e;
+            }
         }
-
-        $maxOrder = $section->subsections()->max('order_index') ?? 0;
-
-        $subsection = Subsection::create([
-            'section_id' => $section->id,
-            'title' => $validated['title'],
-            'slug' => $slug,
-            'order_index' => $maxOrder + 1,
-            'is_published' => $validated['is_published'] ?? true,
-        ]);
-
-        return response()->json($subsection, 201);
     }
 
     public function update(Request $request, Subsection $subsection)
@@ -94,9 +102,11 @@ class SubsectionController extends Controller
             }
         }
 
-        foreach ($validated['ordered_ids'] as $index => $id) {
-            Subsection::where('id', $id)->update(['order_index' => $index + 1]);
-        }
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['ordered_ids'] as $index => $id) {
+                Subsection::where('id', $id)->update(['order_index' => $index + 1]);
+            }
+        });
 
         return response()->json(['message' => 'Reordered']);
     }

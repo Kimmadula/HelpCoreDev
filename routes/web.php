@@ -82,7 +82,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 });
 
 
-Route::middleware(['auth'])->prefix('api/admin')->group(function () {
+Route::middleware(['auth', 'throttle:api'])->prefix('api/admin')->group(function () {
     // Products
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Subsection;
 use App\Models\PageBlock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PageBlockController extends Controller
 {
@@ -101,9 +102,11 @@ class PageBlockController extends Controller
             }
         }
 
-        foreach ($validated['ordered_ids'] as $index => $id) {
-            PageBlock::where('id', $id)->update(['order_index' => $index + 1]);
-        }
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['ordered_ids'] as $index => $id) {
+                PageBlock::where('id', $id)->update(['order_index' => $index + 1]);
+            }
+        });
 
         return response()->json(['message' => 'Reordered']);
     }

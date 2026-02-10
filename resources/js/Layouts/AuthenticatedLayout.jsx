@@ -18,12 +18,10 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/" className="flex items-center gap-3 group">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                                        <ApplicationLogo className="block h-6 w-auto fill-current text-white" />
-                                    </div>
-                                    <span className="text-xl font-bold text-gray-800 hidden sm:block">Admin Panel</span>
-                                </Link>
+                                <div className="flex items-center gap-3 group">
+                                    <ApplicationLogo className="block h-6 w-auto fill-current text-white" />
+                                    <span className="text-xl font-bold text-gray-800 hidden sm:block">Admin</span>
+                                </div>
                             </div>
 
                             <div className="hidden space-x-2 sm:-my-px sm:ms-10 sm:flex sm:items-center">

@@ -121,7 +121,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
         </div>
       }
     >
-      <Head title="Admin • Edit Subsections" />
+      <Head title="Subsections" />
 
       <div className="py-8">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">

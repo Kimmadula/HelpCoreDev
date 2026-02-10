@@ -11,20 +11,59 @@ import { Extension } from '@tiptap/core';
 import axios from 'axios';
 import Link from '@tiptap/extension-link';
 
-// Custom Tab Extension that actually works
 const TabExtension = Extension.create({
     name: 'tabHandler',
 
     addKeyboardShortcuts() {
         return {
             Tab: () => {
-                // Insert actual tab character or non-breaking spaces
+                if (this.editor.can().sinkListItem('listItem')) {
+                    return this.editor.commands.sinkListItem('listItem');
+                }
                 this.editor.commands.insertContent('\u00A0\u00A0\u00A0\u00A0');
-                return true; // Prevent default tab behavior
+                return true;
+            },
+            'Shift-Tab': () => {
+                if (this.editor.can().liftListItem('listItem')) {
+                    return this.editor.commands.liftListItem('listItem');
+                }
+                return false;
             },
         };
     },
 });
+
+const uploadImage = async (file, view) => {
+    // 2MB limit
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Image size exceeds the 2MB limit.");
+        return false;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        const res = await axios.post("/api/admin/uploads/images", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (res.data && res.data.path) {
+            const url = (res.data.path.startsWith('http') || res.data.path.startsWith('/storage'))
+                ? res.data.path
+                : `/storage/${res.data.path}`;
+
+            const node = view.state.schema.nodes.image.create({ src: url });
+            const transaction = view.state.tr.replaceSelectionWith(node);
+            view.dispatch(transaction);
+            return true;
+        }
+    } catch (error) {
+        console.error("Image upload failed:", error);
+        alert("Failed to upload image. Please try again.");
+    }
+    return false;
+};
 
 const MenuBar = ({ editor }) => {
     const fileInputRef = useRef(null);
@@ -53,28 +92,10 @@ const MenuBar = ({ editor }) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append("image", file);
+        await uploadImage(file, editor.view);
 
-        try {
-            const res = await axios.post("/api/admin/uploads/images", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            if (res.data && res.data.path) {
-                const url = (res.data.path.startsWith('http') || res.data.path.startsWith('/storage'))
-                    ? res.data.path
-                    : `/storage/${res.data.path}`;
-
-                editor.chain().focus().setImage({ src: url }).setTextAlign('center').run();
-            }
-        } catch (error) {
-            console.error("Image upload failed:", error);
-            alert("Failed to upload image. Please try again.");
-        } finally {
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
         }
     };
 
@@ -253,7 +274,6 @@ export default function RichTextEditor({ value, onChange }) {
             }),
             Image.configure({
                 inline: true,
-                allowBase64: true,
             }),
             Link.configure({
                 openOnClick: false,
@@ -265,6 +285,33 @@ export default function RichTextEditor({ value, onChange }) {
         editorProps: {
             attributes: {
                 class: 'prose max-w-none focus:outline-none min-h-[200px] p-4 bg-white rounded-b-lg'
+            },
+            handlePaste: (view, event, slice) => {
+                const items = event.clipboardData?.items;
+                if (items) {
+                    for (const item of items) {
+                        if (item.type.startsWith("image")) {
+                            event.preventDefault();
+                            const file = item.getAsFile();
+                            if (file) {
+                                uploadImage(file, view);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            },
+            handleDrop: (view, event, slice, moved) => {
+                if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+                    const file = event.dataTransfer.files[0];
+                    if (file.type.startsWith("image")) {
+                        event.preventDefault();
+                        uploadImage(file, view);
+                        return true;
+                    }
+                }
+                return false;
             }
         },
         onUpdate: ({ editor }) => {
@@ -291,6 +338,8 @@ export default function RichTextEditor({ value, onChange }) {
                 .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
                 .ProseMirror a { color: #2563eb; text-decoration: underline; cursor: pointer; }
                 .ProseMirror { white-space: pre-wrap; }
+                .ProseMirror ul ul { list-style-type: circle; }
+                .ProseMirror ul ul ul { list-style-type: square; }
             `}</style>
         </div>
     );

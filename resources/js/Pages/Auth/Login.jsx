@@ -120,7 +120,7 @@ export default function Login({ status, canResetPassword }) {
                                 className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                             />
                             <span className="ml-2 text-sm text-gray-700">
-                                Keep me signed in
+                                Remember me
                             </span>
                         </div>
 
@@ -129,7 +129,7 @@ export default function Login({ status, canResetPassword }) {
                                 href={route('password.request')}
                                 className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
                             >
-                                Forgot password
+                                Forgot Password?
                             </Link>
                         )}
                     </div>
@@ -139,7 +139,7 @@ export default function Login({ status, canResetPassword }) {
                         className="w-full justify-center py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={processing}
                     >
-                        {processing ? 'Signing in...' : 'Sign in'}
+                        {processing ? 'Logging in...' : 'Login'}
                     </PrimaryButton>
                 </form>
 
@@ -150,7 +150,7 @@ export default function Login({ status, canResetPassword }) {
                         href={route('register')}
                         className="text-orange-600 hover:text-orange-700 font-medium transition-colors"
                     >
-                        Create one
+                        Register now
                     </Link>
                 </div>
             </div>

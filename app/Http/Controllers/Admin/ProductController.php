@@ -25,21 +25,28 @@ class ProductController extends Controller
         ]);
 
         $slug = $validated['slug'] ?? Str::slug($validated['name']);
-
-        $baseSlug = $slug;
+        $originalSlug = $slug;
         $i = 2;
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $i;
-            $i++;
+
+        while (true) {
+            try {
+                $product = Product::create([
+                    'name' => $validated['name'],
+                    'slug' => $slug,
+                    'is_published' => $validated['is_published'] ?? true,
+                ]);
+
+                return response()->json($product, 201);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // MySQL error code for duplicate entry is 1062
+                if (($e->errorInfo[1] ?? 0) == 1062) {
+                    $slug = $originalSlug . '-' . $i;
+                    $i++;
+                    continue;
+                }
+                throw $e;
+            }
         }
-
-        $product = Product::create([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'is_published' => $validated['is_published'] ?? true,
-        ]);
-
-        return response()->json($product, 201);
     }
 
     public function update(Request $request, Product $product)

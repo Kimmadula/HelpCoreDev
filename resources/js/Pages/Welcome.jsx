@@ -49,7 +49,7 @@ export default function MainLanding() {
 
   return (
     <>
-      <Head title="CoreDev" />
+      <Head title="Knowledge Base" />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
@@ -168,22 +168,23 @@ export default function MainLanding() {
 
           <div className="hero-content relative z-10 text-center max-w-3xl w-full">
             <h1
-              className="text-5xl md:text-7xl font-extrabold mb-4"
+              className="text-5xl md:text-7xl font-extrabold mb-4 
+             bg-gradient-to-t from-[#ff6c00] from-0% to-white to-75% bg-clip-text text-transparent"
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 letterSpacing: '-0.03em',
                 textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                color: '#ff6c00'
               }}
             >
-              Knowledge Base
+              Kn<img src="/coreDev.png" alt="o" style={{ width: '1em', height: '1em', verticalAlign: 'middle', 
+                display: 'inline-block', margin: '0 2px' }} />wledge Base
             </h1>
 
             <p className="text-lg text-white mb-10 font-normal">
               Explore and learn more about our products.
             </p>
 
-            {/* Search Bar with Autosuggest */}
+            {/* Search Bar */}
             <div className="search-container w-full max-w-2xl mx-auto relative group">
               <div className="relative z-50">
                 <svg
@@ -218,7 +219,7 @@ export default function MainLanding() {
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   placeholder="Search keyword..."
-                  className="w-full py-4 pl-14 pr-6 text-base rounded-xl border-none shadow-lg focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-200 transition-all"
+                  className="w-full py-4 pl-14 pr-6 text-base rounded-xl border-none shadow-lg focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#ff6c00] transition-all"
                   style={{
                     background: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(10px)'
@@ -358,24 +359,27 @@ export default function MainLanding() {
         </section>
 
         {/* FOOTER */}
-        <footer className="bg-gray-200 border-t border-gray-300">
-          <div className="max-w-6xl mx-auto px-8 py-8">
+        <footer className="bg-[#353635] border-t border-gray-300">
+          <div className="max-w-6xl mx-auto px-5 py-5">
             <div className="flex flex-wrap justify-between items-center gap-8">
-              <div className="flex gap-12 text-sm text-gray-600">
-                <div className="cursor-pointer hover:text-gray-900 transition-colors">
+              <div className="flex gap-12 text-sm text-white">
+                <div className="cursor-pointer transition-colors">
                   HELP DESK
                 </div>
-                <div className="cursor-pointer hover:text-gray-900 transition-colors">
+                <div className="cursor-pointer transition-colors">
                   ISSUE TRACKER
                 </div>
               </div>
 
-              <div className="text-s text-gray-500">
-                © {new Date().getFullYear()} Powered by <a
+              <div className="text-s text-white">
+                © {new Date().getFullYear()} Powered by
+                <a
                   href="https://coredev.ph/"
                   target="_blank"
-                  className="text-[#51bcda] hover:opacity-80">
-                  Coredev Solutions Inc.
+                  className="text-[#51bcda]">
+                  <img src="/coreDevlogo.png" alt="coreDev" style={{ width: '1em', height: '1em', 
+                    verticalAlign: 'middle', display: 'inline-block', margin: '0 2px' }} />
+                    coredev Solutions Inc.
                 </a>
               </div>
             </div>
