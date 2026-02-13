@@ -1,0 +1,61 @@
+import Modal from './Modal';
+
+export default function ConfirmDialog({
+    isOpen,
+    onClose,
+    onConfirm,
+    title = "Confirm Action",
+    message = "Are you sure you want to proceed?",
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+    type = "danger" // danger | warning | info
+}) {
+    const isDanger = type === "danger";
+
+    // Use a simpler modal layout or reuse generic Modal
+    // For simplicity, let's reuse generic Modal but customize header colors if we want.
+    // Actually, let's just make a specific nice implementation since Verify used standard Modal.
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose}></div>
+
+                <div className="relative bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden transform transition-all">
+                    <div className="p-6">
+                        <div className="mb-4">
+                            <h3 className={`text-lg font-medium leading-6 ${isDanger ? 'text-red-600' : 'text-gray-900'}`}>
+                                {title}
+                            </h3>
+                            <div className="mt-2 text-sm text-gray-500">
+                                {message}
+                            </div>
+                        </div>
+
+                        <div className="mt-5 sm:mt-6 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="flex-1 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                            >
+                                {cancelText}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onConfirm}
+                                className={`flex-1 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm ${isDanger
+                                        ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                                    }`}
+                            >
+                                {confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

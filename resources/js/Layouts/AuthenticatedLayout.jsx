@@ -48,7 +48,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
                                 <ApplicationLogo className="w-6 h-6 fill-current text-slate-800" />
                             </div>
-                            <span className="text-xl font-bold whitespace-nowrap">Admin</span>
+                            <span className="text-xl font-bold whitespace-nowrap">Knowledge Base</span>
 
                             {/* Mobile close button */}
                             <button

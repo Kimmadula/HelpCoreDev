@@ -66,7 +66,7 @@ const uploadImage = async (file, view) => {
     return false;
 };
 
-const MenuBar = ({ editor }) => {
+const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
     const fileInputRef = useRef(null);
 
     if (!editor) {
@@ -107,154 +107,186 @@ const MenuBar = ({ editor }) => {
         }`;
 
     return (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white rounded-t-lg sticky top-0 z-20">
-            {/* Hidden File Input */}
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-            />
+        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white rounded-t-lg sticky top-0 z-20 items-center justify-between">
+            <div className="flex flex-wrap gap-1 items-center">
+                {/* Hidden File Input */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                />
 
-            <div className="flex gap-1 pr-2 border-r border-gray-300">
-                <button
-                    onClick={() => editor.chain().focus().toggleBold().run()}
-                    disabled={!editor.can().chain().focus().toggleBold().run()}
-                    className={buttonClass(editor.isActive('bold'))}
-                    title="Bold"
-                    type="button"
-                >
-                    <strong>B</strong>
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().toggleItalic().run()}
-                    disabled={!editor.can().chain().focus().toggleItalic().run()}
-                    className={buttonClass(editor.isActive('italic'))}
-                    title="Italic"
-                    type="button"
-                >
-                    <em>I</em>
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().toggleUnderline().run()}
-                    className={buttonClass(editor.isActive('underline'))}
-                    title="Underline"
-                    type="button"
-                >
-                    <u>U</u>
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().toggleStrike().run()}
-                    className={buttonClass(editor.isActive('strike'))}
-                    title="Strikethrough"
-                    type="button"
-                >
-                    <s>S</s>
-                </button>
+                <div className="flex gap-1 pr-2 border-r border-gray-300">
+                    <button
+                        onClick={() => editor.chain().focus().toggleBold().run()}
+                        disabled={!editor.can().chain().focus().toggleBold().run()}
+                        className={buttonClass(editor.isActive('bold'))}
+                        title="Bold"
+                        type="button"
+                    >
+                        <strong>B</strong>
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleItalic().run()}
+                        disabled={!editor.can().chain().focus().toggleItalic().run()}
+                        className={buttonClass(editor.isActive('italic'))}
+                        title="Italic"
+                        type="button"
+                    >
+                        <em>I</em>
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleUnderline().run()}
+                        className={buttonClass(editor.isActive('underline'))}
+                        title="Underline"
+                        type="button"
+                    >
+                        <u>U</u>
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleStrike().run()}
+                        className={buttonClass(editor.isActive('strike'))}
+                        title="Strikethrough"
+                        type="button"
+                    >
+                        <s>S</s>
+                    </button>
+                </div>
+
+                <div className="flex gap-1 px-2 border-r border-gray-300">
+                    <button
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                        className={buttonClass(editor.isActive('heading', { level: 2 }))}
+                        title="Heading 2"
+                        type="button"
+                    >
+                        H2
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                        className={buttonClass(editor.isActive('heading', { level: 3 }))}
+                        title="Heading 3"
+                        type="button"
+                    >
+                        H3
+                    </button>
+                </div>
+
+                <div className="flex gap-1 px-2 border-r border-gray-300">
+                    <button
+                        onClick={() => editor.chain().focus().toggleBulletList().run()}
+                        className={buttonClass(editor.isActive('bulletList'))}
+                        title="Bullet List"
+                        type="button"
+                    >
+                        • List
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                        className={buttonClass(editor.isActive('orderedList'))}
+                        title="Ordered List"
+                        type="button"
+                    >
+                        1. List
+                    </button>
+                </div>
+
+                <div className="flex gap-1 px-2 border-r border-gray-300">
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'left' }))}
+                        title="Left"
+                        type="button"
+                    >
+                        Left
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'center' }))}
+                        title="Center"
+                        type="button"
+                    >
+                        Center
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'right' }))}
+                        title="Right"
+                        type="button"
+                    >
+                        Right
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'justify' }))}
+                        title="Justify"
+                        type="button"
+                    >
+                        Justify
+                    </button>
+                </div>
+
+
+                <div className="flex gap-1 px-2 border-r border-gray-300">
+                    <button
+                        onClick={addYoutubeVideo}
+                        className={buttonClass(editor.isActive('youtube'))}
+                        title="Add Video"
+                        type="button"
+                    >
+                        ▶ Video
+                    </button>
+                    <button
+                        onClick={triggerImageUpload}
+                        className={buttonClass(editor.isActive('image'))}
+                        title="Add Image"
+                        type="button"
+                    >
+                        🖼 Image
+                    </button>
+                </div>
+
+                <div className="flex gap-1 px-2">
+                    <ColorPicker editor={editor} />
+                </div>
             </div>
 
-            <div className="flex gap-1 px-2 border-r border-gray-300">
+            {/* Save Button in Toolbar */}
+            {onSave && (
                 <button
-                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                    className={buttonClass(editor.isActive('heading', { level: 2 }))}
-                    title="Heading 2"
                     type="button"
+                    onClick={onSave}
+                    disabled={!isDirty || isSaving}
+                    className={`ml-auto inline-flex items-center px-3 py-1.5 text-sm font-medium rounded transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${isDirty && !isSaving
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                            : 'bg-gray-100 text-gray-400'
+                        }`}
                 >
-                    H2
+                    {isSaving ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Saving...
+                        </>
+                    ) : (
+                        <>
+                            <svg className={`w-4 h-4 mr-1.5 ${isDirty ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg>
+                            Save
+                        </>
+                    )}
                 </button>
-                <button
-                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                    className={buttonClass(editor.isActive('heading', { level: 3 }))}
-                    title="Heading 3"
-                    type="button"
-                >
-                    H3
-                </button>
-            </div>
-
-            <div className="flex gap-1 px-2 border-r border-gray-300">
-                <button
-                    onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    className={buttonClass(editor.isActive('bulletList'))}
-                    title="Bullet List"
-                    type="button"
-                >
-                    • List
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                    className={buttonClass(editor.isActive('orderedList'))}
-                    title="Ordered List"
-                    type="button"
-                >
-                    1. List
-                </button>
-            </div>
-
-            <div className="flex gap-1 px-2 border-r border-gray-300">
-                <button
-                    onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                    className={buttonClass(editor.isActive({ textAlign: 'left' }))}
-                    title="Left"
-                    type="button"
-                >
-                    Left
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                    className={buttonClass(editor.isActive({ textAlign: 'center' }))}
-                    title="Center"
-                    type="button"
-                >
-                    Center
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                    className={buttonClass(editor.isActive({ textAlign: 'right' }))}
-                    title="Right"
-                    type="button"
-                >
-                    Right
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-                    className={buttonClass(editor.isActive({ textAlign: 'justify' }))}
-                    title="Justify"
-                    type="button"
-                >
-                    Justify
-                </button>
-            </div>
-
-
-            <div className="flex gap-1 px-2 border-r border-gray-300">
-                <button
-                    onClick={addYoutubeVideo}
-                    className={buttonClass(editor.isActive('youtube'))}
-                    title="Add Video"
-                    type="button"
-                >
-                    ▶ Video
-                </button>
-                <button
-                    onClick={triggerImageUpload}
-                    className={buttonClass(editor.isActive('image'))}
-                    title="Add Image"
-                    type="button"
-                >
-                    🖼 Image
-                </button>
-            </div>
-
-            <div className="flex gap-1 px-2">
-                <ColorPicker editor={editor} />
-            </div>
+            )}
         </div>
     );
 };
 
-export default function RichTextEditor({ value, onChange }) {
+export default function RichTextEditor({ value, onChange, onSave, isSaving, isDirty }) {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -279,7 +311,7 @@ export default function RichTextEditor({ value, onChange }) {
         content: value,
         editorProps: {
             attributes: {
-                class: 'prose max-w-none focus:outline-none min-h-[200px] p-4 bg-white rounded-b-lg'
+                class: 'prose max-w-none focus:outline-none min-h-[400px] p-4 bg-white rounded-b-lg'
             },
             handlePaste: (view, event, slice) => {
                 const items = event.clipboardData?.items;
@@ -322,7 +354,7 @@ export default function RichTextEditor({ value, onChange }) {
 
     return (
         <div className="border border-gray-200 rounded-lg shadow-sm bg-white">
-            <MenuBar editor={editor} />
+            <MenuBar editor={editor} onSave={onSave} isSaving={isSaving} isDirty={isDirty} />
             <EditorContent editor={editor} />
             <style>{`
                 .ProseMirror p { margin-bottom: 0.5em; }

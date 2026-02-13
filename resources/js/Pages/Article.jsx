@@ -453,6 +453,17 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         .article-richtext p {
             margin-bottom: 1.125rem;
             line-height: 1.75;
+            min-height: 1.75em;
+        }
+        
+        /* Ensure empty paragraphs are visible but take less space */
+        .article-richtext p:empty {
+            margin-bottom: 0;
+        }
+
+        .article-richtext p:empty::before {
+            content: "\\00a0";
+            display: inline-block;
         }
         
         .article-richtext p[style*="text-align: center"],
@@ -664,6 +675,8 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
         {/* Sidebar */}
         <aside className={`sidebar-nav ${sidebarOpen ? 'open' : ''}`}>
+          
+          <a href="/">
           <div className="sidebar-header">
             <div className="sidebar-logo">
               <a href="/">
@@ -672,6 +685,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
             </div>
             <div className="sidebar-brand">Knowledge Base</div>
           </div>
+          </a>
 
           <div className="sidebar-content">
             {nav?.sections?.map((section) => (
@@ -724,31 +738,31 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
             )}
           </div>
 
-        {/* FOOTER */}
-        <footer className="bg-[#353635] border-t border-gray-300">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex flex-wrap justify-between items-center gap-8">
-              <div className="flex gap-12 text-sm text-white">
-                <div className="cursor-pointer transition-colors">
-                  HELP DESK
+          {/* FOOTER */}
+          <footer className="bg-[#353635] border-t border-gray-300">
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <div className="flex flex-wrap justify-between items-center gap-8">
+                <div className="flex gap-12 text-xs text-white">
+                  <div className="cursor-pointer transition-colors">
+                    HELP DESK
+                  </div>
+                  <div className="cursor-pointer transition-colors">
+                    ISSUE TRACKER
+                  </div>
                 </div>
-                <div className="cursor-pointer transition-colors">
-                  ISSUE TRACKER
-                </div>
-              </div>
 
-              <div className="text-s text-white">
-                © {new Date().getFullYear()} Powered by <img src="/coreDevlogo.png" alt="o" style={{ width: '1em', height: '1em', verticalAlign: 'middle', display: 'inline-block', margin: '0 2px' }} />
-                <a
-                  href="https://coredev.ph/"
-                  target="_blank"
-                  className="text-[#51bcda] hover:opacity-80">
-                  coredev Solutions Inc.
-                </a>
+                <div className="text-xs text-white">
+                  © {new Date().getFullYear()} Powered by <img src="/coreDevlogo.png" alt="o" style={{ width: '1em', height: '1em', verticalAlign: 'middle', display: 'inline-block', margin: '0 2px' }} />
+                  <a
+                    href="https://coredev.ph/"
+                    target="_blank"
+                    className="text-[#51bcda] hover:opacity-80">
+                    coredev Solutions Inc.
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        </footer>
+          </footer>
 
         </main>
       </div>

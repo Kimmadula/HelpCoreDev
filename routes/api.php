@@ -15,13 +15,6 @@ Route::get('/help/products', function () {
         ->get(['id', 'name', 'slug']);
 });
 
-/*
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\SectionController;
-use App\Http\Controllers\Admin\PageController;
-use App\Http\Controllers\Admin\PageBlockController;
-
 Route::middleware('auth')->prefix('admin')->group(function () {
     // Products
     Route::get('/products', [ProductController::class, 'index']);
@@ -50,4 +43,3 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/blocks/{block}', [PageBlockController::class, 'destroy']);
     Route::put('/pages/{page}/blocks/reorder', [PageBlockController::class, 'reorder']);
 });
-*/
