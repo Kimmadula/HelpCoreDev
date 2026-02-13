@@ -2,24 +2,20 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useToast } from "@/Contexts/ToastContext";
+import Skeleton from "@/Components/Skeleton";
 
 export default function ProductSections({ productId, productTitle }) {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [title, setTitle] = useState("");
   const [isPublished, setIsPublished] = useState(true);
-
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editPublished, setEditPublished] = useState(true);
-
   const [deletingId, setDeletingId] = useState(null);
-
-  // Create Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // ... (existing effects)
+  const toast = useToast();
 
   const createSection = async (e) => {
     e.preventDefault();
@@ -31,6 +27,7 @@ export default function ProductSections({ productId, productTitle }) {
     setIsPublished(true);
     setShowCreateModal(false);
     await loadSections();
+    toast.success("Section created successfully.");
   };
 
   const loadSections = async () => {
@@ -67,6 +64,7 @@ export default function ProductSections({ productId, productTitle }) {
     });
     await loadSections();
     cancelEdit();
+    toast.success("Section updated successfully.");
   };
 
   const startDelete = (id) => {
@@ -83,6 +81,7 @@ export default function ProductSections({ productId, productTitle }) {
     await loadSections();
     if (editingId === deletingId) cancelEdit();
     cancelDelete();
+    toast.success("Section deleted successfully.");
   };
 
   const move = async (index, direction) => {
@@ -90,14 +89,23 @@ export default function ProductSections({ productId, productTitle }) {
     const swapWith = direction === "up" ? index - 1 : index + 1;
     if (swapWith < 0 || swapWith >= newArr.length) return;
 
+    // 1. Optimistic Update
+    const previousSections = [...sections];
     [newArr[index], newArr[swapWith]] = [newArr[swapWith], newArr[index]];
     setSections(newArr);
 
-    await axios.put(`/api/admin/products/${productId}/sections/reorder`, {
-      ordered_ids: newArr.map((s) => s.id),
-    });
-
-    await loadSections();
+    try {
+      // 2. Background Request
+      await axios.put(`/api/admin/products/${productId}/sections/reorder`, {
+        ordered_ids: newArr.map((s) => s.id),
+      });
+      // Success: No need to reload, we already have the new state.
+    } catch (error) {
+      console.error("Reorder failed:", error);
+      // 3. Rollback on Error
+      setSections(previousSections);
+      toast.error("Failed to reorder sections. Please try again.");
+    }
   };
 
   const deletingSection = sections.find((s) => s.id === deletingId);
@@ -118,21 +126,11 @@ export default function ProductSections({ productId, productTitle }) {
     >
       <Head title="Sections" />
 
-      <div className="py-8">
+      <div className="py-2">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
             {/* Back Navigation */}
-            <div>
-              <a
-                href="/admin/products"
-                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Products
-              </a>
-            </div>
+
 
             {/* Create Modal */}
             {showCreateModal && (
@@ -241,9 +239,8 @@ export default function ProductSections({ productId, productTitle }) {
               </div>
 
               {loading ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
-                  <p className="mt-4 text-gray-600">Loading sections...</p>
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-lg" count={3} />
                 </div>
               ) : sections.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -322,7 +319,7 @@ export default function ProductSections({ productId, productTitle }) {
 
                             <button
                               onClick={() => startEdit(s)}
-                              className="inline-flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                              className="inline-flex items-center px-3 py-2 border border-green-500 text-green-700 text-sm font-medium rounded-lg hover:bg-green-50 transition-colors"
                             >
                               <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -332,7 +329,7 @@ export default function ProductSections({ productId, productTitle }) {
 
                             <button
                               onClick={() => startDelete(s.id)}
-                              className="inline-flex items-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-red-50 hover:border-red-300 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                              className="inline-flex items-center px-3 py-2 border border-red-500 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors"
                             >
                               <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

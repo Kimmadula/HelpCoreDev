@@ -176,8 +176,10 @@ export default function MainLanding() {
                 textShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
               }}
             >
-              Kn<img src="/coreDev.png" alt="o" style={{ width: '1em', height: '1em', verticalAlign: 'middle', 
-                display: 'inline-block', margin: '0 2px' }} />wledge Base
+              Kn<img src="/coreDev.png" alt="o" style={{
+                width: '1em', height: '1em', verticalAlign: 'middle',
+                display: 'inline-block', margin: '0 2px'
+              }} />wledge Base
             </h1>
 
             <p className="text-lg text-white mb-10 font-normal">
@@ -373,13 +375,12 @@ export default function MainLanding() {
 
               <div className="text-s text-white">
                 © {new Date().getFullYear()} Powered by
-                <a
-                  href="https://coredev.ph/"
-                  target="_blank"
-                  className="text-[#51bcda]">
-                  <img src="/coreDevlogo.png" alt="coreDev" style={{ width: '1em', height: '1em', 
-                    verticalAlign: 'middle', display: 'inline-block', margin: '0 2px' }} />
-                    coredev Solutions Inc.
+                <a href="https://coredev.ph/" target="_blank" className="text-[#51bcda]">
+                  <img src="/coreDevlogo.png" alt="coreDev" style={{
+                    width: '1em', height: '1em',
+                    verticalAlign: 'middle', display: 'inline-block', margin: '0 2px'
+                  }} />
+                  coredev Solutions Inc.
                 </a>
               </div>
             </div>

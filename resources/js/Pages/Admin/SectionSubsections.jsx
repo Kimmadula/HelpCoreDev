@@ -3,6 +3,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useToast } from "@/Contexts/ToastContext";
+import Skeleton from "@/Components/Skeleton";
 
 export default function SectionSubsections({ sectionId, productId, sectionTitle, productTitle }) {
   const [subsections, setSubsections] = useState([]);
@@ -19,6 +21,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
 
   // Create Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const toast = useToast();
 
   const loadSubsections = async () => {
     setLoading(true);
@@ -44,6 +47,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     setIsPublished(true);
     setShowCreateModal(false);
     await loadSubsections();
+    toast.success("Subsection created successfully.");
   };
 
   const startEdit = (s) => {
@@ -66,6 +70,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     });
     await loadSubsections();
     cancelEdit();
+    toast.success("Subsection updated successfully.");
   };
 
   const startDelete = (id) => {
@@ -82,6 +87,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     await loadSubsections();
     if (editingId === deletingId) cancelEdit();
     cancelDelete();
+    toast.success("Subsection deleted successfully.");
   };
 
   const move = async (index, direction) => {
@@ -89,14 +95,23 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     const swapWith = direction === "up" ? index - 1 : index + 1;
     if (swapWith < 0 || swapWith >= newArr.length) return;
 
+    // 1. Optimistic Update
+    const previousSubsections = [...subsections];
     [newArr[index], newArr[swapWith]] = [newArr[swapWith], newArr[index]];
     setSubsections(newArr);
 
-    await axios.put(`/api/admin/sections/${sectionId}/subsections/reorder`, {
-      ordered_ids: newArr.map((s) => s.id),
-    });
-
-    await loadSubsections();
+    try {
+      // 2. Background Request
+      await axios.put(`/api/admin/sections/${sectionId}/subsections/reorder`, {
+        ordered_ids: newArr.map((s) => s.id),
+      });
+      // Success: No need to reload
+    } catch (error) {
+      console.error("Reorder failed:", error);
+      // 3. Rollback
+      setSubsections(previousSubsections);
+      toast.error("Failed to reorder subsections. Please try again.");
+    }
   };
 
   const deletingSubsection = subsections.find((s) => s.id === deletingId);
@@ -123,24 +138,10 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     >
       <Head title="Subsections" />
 
-      <div className="py-8">
+      <div className="py-2">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
             {/* Back Navigation */}
-            <div>
-              <a
-                href={`/admin/products/${productId}/sections`}
-                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Sections
-              </a>
-            </div>
-
-            {/* Create Subsection Button (replaces inline form) */}
-
 
             {/* Create Modal */}
             {showCreateModal && (
@@ -249,9 +250,8 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
               </div>
 
               {loading ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
-                  <p className="mt-4 text-gray-600">Loading subsections...</p>
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-lg" count={3} />
                 </div>
               ) : subsections.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">

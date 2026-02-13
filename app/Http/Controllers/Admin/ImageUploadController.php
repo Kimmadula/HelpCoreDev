@@ -11,7 +11,7 @@ class ImageUploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => ['required', 'image', 'max:5120'], // 5MB max
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max, strict types
         ]);
 
         $path = $request->file('image')->store('help-images', 'public');

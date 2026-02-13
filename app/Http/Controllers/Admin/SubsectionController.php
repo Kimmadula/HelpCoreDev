@@ -8,6 +8,8 @@ use App\Models\Subsection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Admin\StoreSubsectionRequest;
+use App\Http\Requests\Admin\UpdateSubsectionRequest;
 
 class SubsectionController extends Controller
 {
@@ -18,13 +20,9 @@ class SubsectionController extends Controller
         );
     }
 
-    public function store(Request $request, Section $section)
+    public function store(StoreSubsectionRequest $request, Section $section)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255'],
-            'is_published' => ['nullable', 'boolean'],
-        ]);
+        $validated = $request->validated();
 
         $slug = $validated['slug'] ?? Str::slug($validated['title']);
         $originalSlug = $slug;
@@ -55,13 +53,9 @@ class SubsectionController extends Controller
         }
     }
 
-    public function update(Request $request, Subsection $subsection)
+    public function update(UpdateSubsectionRequest $request, Subsection $subsection)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255'],
-            'is_published' => ['nullable', 'boolean'],
-        ]);
+        $validated = $request->validated();
 
         $exists = Subsection::where('section_id', $subsection->section_id)
             ->where('slug', $validated['slug'])

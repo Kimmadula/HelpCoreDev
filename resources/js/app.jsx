@@ -1,5 +1,9 @@
 import '../css/app.css';
 import './bootstrap';
+import '../css/app.css';
+import './bootstrap';
+import ErrorBoundary from '@/Components/ErrorBoundary';
+import { ToastProvider } from '@/Contexts/ToastContext';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -17,7 +21,13 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <ErrorBoundary>
+                <ToastProvider>
+                    <App {...props} />
+                </ToastProvider>
+            </ErrorBoundary>
+        );
     },
     progress: {
         color: '#4B5563',

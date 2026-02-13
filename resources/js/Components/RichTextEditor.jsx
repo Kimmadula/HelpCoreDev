@@ -10,6 +10,7 @@ import Image from '@tiptap/extension-image';
 import { Extension } from '@tiptap/core';
 import axios from 'axios';
 import Link from '@tiptap/extension-link';
+import ColorPicker from './ColorPicker';
 
 const TabExtension = Extension.create({
     name: 'tabHandler',
@@ -247,13 +248,7 @@ const MenuBar = ({ editor }) => {
             </div>
 
             <div className="flex gap-1 px-2">
-                <input
-                    type="color"
-                    onInput={event => editor.chain().focus().setColor(event.target.value).run()}
-                    value={editor.getAttributes('textStyle').color || '#000000'}
-                    className="w-8 h-8 p-1 rounded cursor-pointer border border-gray-300"
-                    title="Text Color"
-                />
+                <ColorPicker editor={editor} />
             </div>
         </div>
     );

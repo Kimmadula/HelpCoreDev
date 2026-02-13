@@ -3,6 +3,8 @@ import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import RichTextEditor from "@/Components/RichTextEditor";
+import { useToast } from "@/Contexts/ToastContext";
+import Skeleton from "@/Components/Skeleton";
 
 import {
   DndContext,
@@ -409,6 +411,7 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [richTextContent, setRichTextContent] = useState("");
+  const toast = useToast();
 
   const loadBlocks = async () => {
     setLoading(true);
@@ -437,18 +440,24 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
 
+    // 1. Optimistic Update
+    const previousBlocks = [...blocks];
     const newArr = arrayMove(blocks, oldIndex, newIndex);
     setBlocks(newArr);
 
     try {
+      // 2. Background Request
       await axios.put(`/api/admin/subsections/${subsectionId}/blocks/reorder`, {
         ordered_ids: newArr.map((b) => b.id),
       });
-      await loadBlocks();
+      console.log("Blocks reordered successfully");
+      // Success: No need to reload
+      toast.success("Blocks reordered successfully.");
     } catch (err) {
       console.error(err);
-      alert("Reorder failed. Reloading…");
-      await loadBlocks();
+      // 3. Rollback
+      setBlocks(previousBlocks);
+      toast.error("Failed to reorder blocks. Please try again.");
     }
   };
 
@@ -457,7 +466,7 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
 
     const stripped = richTextContent.replace(/<[^>]*>/g, '').trim();
     if (!stripped && !richTextContent.includes('<img') && !richTextContent.includes('<iframe')) {
-      alert("Please enter some content.");
+      toast.error("Please enter some content.");
       return;
     }
 
@@ -480,14 +489,32 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
   };
 
   const updateBlock = async (id, data) => {
-    await axios.put(`/api/admin/blocks/${id}`, data);
-    await loadBlocks();
+    try {
+      await axios.put(`/api/admin/blocks/${id}`, data);
+      // We can reload or just let it be if we trust optimistic.
+      // But usually good to align. For now, let's just show success.
+      toast.success("Block updated successfully.");
+      // update parent?
+      // For simplicity, we trigger a reload or update local state if parent passed a callback.
+      // But here we might not have a direct way to update blocks state in parent without reloading.
+      // So let's reload.
+      await loadBlocks(); // Reload blocks to reflect changes
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update block.");
+    }
   };
 
   const deleteBlock = async (id) => {
     if (!confirm("Delete this block?")) return;
-    await axios.delete(`/api/admin/blocks/${id}`);
-    await loadBlocks();
+    try {
+      await axios.delete(`/api/admin/blocks/${id}`);
+      await loadBlocks();
+      toast.success("Block deleted successfully.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete block.");
+    }
   };
 
   return (
@@ -512,7 +539,7 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
     >
       <Head title="Article" />
 
-      <div className="py-8">
+      <div className="py-2">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
@@ -535,9 +562,8 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
             </div>
 
             {loading ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
-                <p className="mt-4 text-gray-600">Loading content...</p>
+              <div className="space-y-4">
+                <Skeleton className="h-32 w-full rounded-lg" count={2} />
               </div>
             ) : blocks.length === 0 ? (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">

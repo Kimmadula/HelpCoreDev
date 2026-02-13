@@ -2,6 +2,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useToast } from "@/Contexts/ToastContext";
+import Skeleton from "@/Components/Skeleton";
 
 export default function SubsectionPages({ subsectionId }) {
     const [pages, setPages] = useState([]);
@@ -17,6 +19,7 @@ export default function SubsectionPages({ subsectionId }) {
     const [editTitle, setEditTitle] = useState("");
     const [editSlug, setEditSlug] = useState("");
     const [editPublished, setEditPublished] = useState(true);
+    const toast = useToast();
 
     const loadPages = async () => {
         setLoading(true);
@@ -44,8 +47,9 @@ export default function SubsectionPages({ subsectionId }) {
             setSlug("");
             setIsPublished(true);
             await loadPages();
+            toast.success("Page created successfully.");
         } catch (err) {
-            alert(err?.response?.data?.message ?? "Failed to create page");
+            toast.error(err?.response?.data?.message ?? "Failed to create page");
             console.error(err);
         }
     };
@@ -74,8 +78,9 @@ export default function SubsectionPages({ subsectionId }) {
             });
             await loadPages();
             cancelEdit();
+            toast.success("Page updated successfully.");
         } catch (err) {
-            alert(err?.response?.data?.message ?? "Failed to update page");
+            toast.error(err?.response?.data?.message ?? "Failed to update page");
             console.error(err);
         }
     };
@@ -85,6 +90,7 @@ export default function SubsectionPages({ subsectionId }) {
         await axios.delete(`/api/admin/pages/${id}`);
         await loadPages();
         if (editingId === id) cancelEdit();
+        toast.success("Page deleted successfully.");
     };
 
     const move = async (index, direction) => {
@@ -92,14 +98,22 @@ export default function SubsectionPages({ subsectionId }) {
         const swapWith = direction === "up" ? index - 1 : index + 1;
         if (swapWith < 0 || swapWith >= newArr.length) return;
 
+        // 1. Optimistic Update
+        const previousPages = [...pages];
         [newArr[index], newArr[swapWith]] = [newArr[swapWith], newArr[index]];
         setPages(newArr);
 
-        await axios.put(`/api/admin/subsections/${subsectionId}/pages/reorder`, {
-            ordered_ids: newArr.map((p) => p.id),
-        });
-
-        await loadPages();
+        try {
+            await axios.put(`/api/admin/subsections/${subsectionId}/pages/reorder`, {
+                ordered_ids: newArr.map((p) => p.id),
+            });
+            // Success: No need to reload
+        } catch (error) {
+            console.error("Reorder failed:", error);
+            // 2. Rollback
+            setPages(previousPages);
+            toast.error("Failed to reorder pages. Please try again.");
+        }
     };
 
     return (
@@ -153,7 +167,9 @@ export default function SubsectionPages({ subsectionId }) {
                         <h3 className="font-semibold mb-4">Pages</h3>
 
                         {loading ? (
-                            <div>Loading…</div>
+                            <div className="space-y-3">
+                                <Skeleton className="h-12 w-full" count={5} />
+                            </div>
                         ) : pages.length === 0 ? (
                             <div>No pages yet.</div>
                         ) : (
