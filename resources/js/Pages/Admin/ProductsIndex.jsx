@@ -15,13 +15,15 @@ export default function ProductsIndex() {
   }), []);
 
   const {
-    items: products,
+    items: rawProducts,
     loading,
     fetchItems,
     createItem,
     updateItem,
     deleteItem,
   } = useCrud(apiMethods);
+
+  const products = Array.isArray(rawProducts) ? rawProducts : (rawProducts?.data || []);
 
   // Load products on mount
   useEffect(() => {

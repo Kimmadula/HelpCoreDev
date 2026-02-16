@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicHelpController;
 use App\Models\Product;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SectionController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PageBlockController;
 
 Route::get('/help/{productSlug}/nav', [PublicHelpController::class, 'navigation']);
 Route::get('/help/subsections/{subsection}', [PublicHelpController::class, 'subsection']);

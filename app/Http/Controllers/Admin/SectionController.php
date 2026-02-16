@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Section;
+use App\Http\Resources\SectionResource;
+use App\Http\Requests\Admin\StoreSectionRequest;
+use App\Http\Requests\Admin\UpdateSectionRequest;
+use App\Http\Requests\Admin\ReorderRequest;
+use App\Services\SortingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,69 +18,81 @@ class SectionController extends Controller
     public function index(Product $product)
     {
         $sections = $product->sections()->orderBy('order_index')->get();
-        return response()->json($sections);
+        return SectionResource::collection($sections);
     }
 
-    public function store(Request $request, Product $product)
+    public function store(StoreSectionRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'is_published' => ['nullable', 'boolean'],
-        ]);
+        try {
+            $validated = $request->validated();
 
-        $maxOrder = $product->sections()->max('order_index') ?? 0;
+            $slug = $validated['slug'] ?? Str::slug($validated['title']);
+            $originalSlug = $slug;
+            $i = 2;
 
-        $section = Section::create([
-            'product_id' => $product->id,
-            'title' => $validated['title'],
-            'order_index' => $maxOrder + 1,
-            'is_published' => $validated['is_published'] ?? true,
-        ]);
+            while (true) {
+                try {
+                    $maxOrder = $product->sections()->max('order_index') ?? 0;
 
-        return response()->json($section, 201);
+                    $section = Section::create([
+                        'product_id' => $product->id,
+                        'title' => $validated['title'],
+                        'slug' => $slug,
+                        'order_index' => $maxOrder + 1,
+                        'is_published' => $validated['is_published'] ?? true,
+                    ]);
+
+                    return new SectionResource($section);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if (($e->errorInfo[1] ?? 0) == 1062) { // MySQL duplicate entry error code
+                        $slug = $originalSlug . '-' . $i;
+                        $i++;
+                        continue; // Try again with a new slug
+                    }
+                    throw $e; // Re-throw other QueryExceptions
+                }
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to create section', 'errors' => $e->getMessage()], 500);
+        }
     }
 
-    public function update(Request $request, Section $section)
+    public function update(UpdateSectionRequest $request, Section $section)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'is_published' => ['nullable', 'boolean'],
-        ]);
+        $validated = $request->validated();
 
         $section->update([
             'title' => $validated['title'],
             'is_published' => $validated['is_published'] ?? $section->is_published,
         ]);
 
-        return response()->json($section);
+        return new SectionResource($section);
     }
 
     public function destroy(Section $section)
     {
-        $section->delete();
-        return response()->json(['message' => 'Deleted']);
+        try {
+            $section->delete();
+            return response()->json(['message' => 'Deleted']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete section', 'errors' => $e->getMessage()], 500);
+        }
     }
 
-    public function reorder(Request $request, Product $product)
+    public function reorder(ReorderRequest $request, Product $product, SortingService $sortingService)
     {
-        $validated = $request->validate([
-            'ordered_ids' => ['required', 'array'],
-            'ordered_ids.*' => ['integer', 'exists:sections,id'],
-        ]);
+        try {
+            $validated = $request->validated();
 
-        $validIds = $product->sections()->pluck('id')->toArray();
-        foreach ($validated['ordered_ids'] as $id) {
-            if (!in_array($id, $validIds)) {
-                return response()->json(['message' => 'Invalid section in reorder list'], 422);
-            }
+            $sortingService->reorder(
+                Section::class,
+                $validated['ordered_ids'],
+                'product_id',
+                $product->id
+            );
+            return response()->json(['message' => 'Reordered']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to reorder sections', 'errors' => $e->getMessage()], 500);
         }
-
-        DB::transaction(function () use ($validated) {
-            foreach ($validated['ordered_ids'] as $index => $id) {
-                Section::where('id', $id)->update(['order_index' => $index + 1]);
-            }
-        });
-
-        return response()->json(['message' => 'Reordered']);
     }
 }

@@ -3,6 +3,7 @@ import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import RichTextEditor from "@/Components/RichTextEditor";
+import ComponentErrorBoundary from "@/Components/ComponentErrorBoundary";
 import { useToast } from "@/Contexts/ToastContext";
 import Skeleton from "@/Components/Skeleton";
 
@@ -204,13 +205,15 @@ function BlockItem({ block, onDelete, onUpdate }) {
         {/* Rich Text Block */}
         {block.type === "richtext" && (
           <div>
-            <RichTextEditor
-              value={localText}
-              onChange={(html) => { setLocalText(html); setIsDirty(true); }}
-              onSave={handleSave}
-              isSaving={isSaving}
-              isDirty={isDirty}
-            />
+            <ComponentErrorBoundary>
+              <RichTextEditor
+                value={localText}
+                onChange={(html) => { setLocalText(html); setIsDirty(true); }}
+                onSave={handleSave}
+                isSaving={isSaving}
+                isDirty={isDirty}
+              />
+            </ComponentErrorBoundary>
           </div>
         )}
 
@@ -517,10 +520,12 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Article</label>
-                      <RichTextEditor
-                        value={richTextContent}
-                        onChange={setRichTextContent}
-                      />
+                      <ComponentErrorBoundary>
+                        <RichTextEditor
+                          value={richTextContent}
+                          onChange={setRichTextContent}
+                        />
+                      </ComponentErrorBoundary>
                     </div>
                   </div>
                 </form>

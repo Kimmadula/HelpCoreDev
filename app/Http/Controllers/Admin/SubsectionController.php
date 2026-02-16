@@ -10,98 +10,106 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Admin\StoreSubsectionRequest;
 use App\Http\Requests\Admin\UpdateSubsectionRequest;
+use App\Http\Requests\Admin\ReorderRequest;
+use App\Http\Resources\SubsectionResource;
+use App\Services\SortingService;
 
 class SubsectionController extends Controller
 {
     public function index(Section $section)
     {
-        return response()->json(
+        return SubsectionResource::collection(
             $section->subsections()->orderBy('order_index')->get()
         );
     }
 
     public function store(StoreSubsectionRequest $request, Section $section)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $slug = $validated['slug'] ?? Str::slug($validated['title']);
-        $originalSlug = $slug;
-        $i = 2;
+            $slug = $validated['slug'] ?? Str::slug($validated['title']);
+            $originalSlug = $slug;
+            $i = 2;
 
-        while (true) {
-            try {
-                $maxOrder = $section->subsections()->max('order_index') ?? 0;
+            while (true) {
+                try {
+                    $maxOrder = $section->subsections()->max('order_index') ?? 0;
 
-                $subsection = Subsection::create([
-                    'section_id' => $section->id,
-                    'title' => $validated['title'],
-                    'slug' => $slug,
-                    'order_index' => $maxOrder + 1,
-                    'is_published' => $validated['is_published'] ?? true,
-                ]);
+                    $subsection = Subsection::create([
+                        'section_id' => $section->id,
+                        'title' => $validated['title'],
+                        'slug' => $slug,
+                        'order_index' => $maxOrder + 1,
+                        'is_published' => $validated['is_published'] ?? true,
+                    ]);
 
-                return response()->json($subsection, 201);
-            } catch (\Illuminate\Database\QueryException $e) {
-                // MySQL error code for duplicate entry is 1062
-                if (($e->errorInfo[1] ?? 0) == 1062) {
-                    $slug = $originalSlug . '-' . $i;
-                    $i++;
-                    continue;
+                    return new SubsectionResource($subsection);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // MySQL error code for duplicate entry is 1062
+                    if (($e->errorInfo[1] ?? 0) == 1062) {
+                        $slug = $originalSlug . '-' . $i;
+                        $i++;
+                        continue;
+                    }
+                    throw $e;
                 }
-                throw $e;
             }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to create subsection', 'errors' => $e->getMessage()], 500);
         }
     }
 
     public function update(UpdateSubsectionRequest $request, Subsection $subsection)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $exists = Subsection::where('section_id', $subsection->section_id)
-            ->where('slug', $validated['slug'])
-            ->where('id', '!=', $subsection->id)
-            ->exists();
+            $exists = Subsection::where('section_id', $subsection->section_id)
+                ->where('slug', $validated['slug'])
+                ->where('id', '!=', $subsection->id)
+                ->exists();
 
-        if ($exists) {
-            return response()->json(['message' => 'Slug already exists in this section.'], 422);
+            if ($exists) {
+                return response()->json(['message' => 'Slug already exists in this section.'], 422);
+            }
+
+            $subsection->update([
+                'title' => $validated['title'],
+                'slug' => $validated['slug'],
+                'is_published' => $validated['is_published'] ?? $subsection->is_published,
+            ]);
+
+            return new SubsectionResource($subsection);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to update subsection', 'errors' => $e->getMessage()], 500);
         }
-
-        $subsection->update([
-            'title' => $validated['title'],
-            'slug' => $validated['slug'],
-            'is_published' => $validated['is_published'] ?? $subsection->is_published,
-        ]);
-
-        return response()->json($subsection);
     }
 
     public function destroy(Subsection $subsection)
     {
-        $subsection->delete();
-        return response()->json(['message' => 'Deleted']);
+        try {
+            $subsection->delete();
+            return response()->json(['message' => 'Deleted']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete subsection', 'errors' => $e->getMessage()], 500);
+        }
     }
 
-    public function reorder(Request $request, Section $section)
+    public function reorder(ReorderRequest $request, Section $section, SortingService $sortingService)
     {
-        $validated = $request->validate([
-            'ordered_ids' => ['required', 'array'],
-            'ordered_ids.*' => ['integer', 'exists:subsections,id'],
-        ]);
+        try {
+            $validated = $request->validated();
 
-        $validIds = $section->subsections()->pluck('id')->toArray();
-
-        foreach ($validated['ordered_ids'] as $id) {
-            if (!in_array($id, $validIds)) {
-                return response()->json(['message' => 'Invalid subsection in reorder list'], 422);
-            }
+            $sortingService->reorder(
+                Subsection::class,
+                $validated['ordered_ids'],
+                'section_id',
+                $section->id
+            );
+            return response()->json(['message' => 'Reordered']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to reorder subsections', 'errors' => $e->getMessage()], 500);
         }
-
-        DB::transaction(function () use ($validated) {
-            foreach ($validated['ordered_ids'] as $index => $id) {
-                Subsection::where('id', $id)->update(['order_index' => $index + 1]);
-            }
-        });
-
-        return response()->json(['message' => 'Reordered']);
     }
 }

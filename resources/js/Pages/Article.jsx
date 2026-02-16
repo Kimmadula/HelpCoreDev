@@ -68,7 +68,7 @@ function ArticleRenderer({ blocks }) {
           if (ytId) {
             const style = imageAlignStyle(b.align);
             return (
-              <div key={b.id} className="article-image-wrapper" style={{ ...style, maxWidth: '640px' }}>
+              <div key={b.id} className="article-image-wrapper" style={{ ...style, maxWidth: '900px', margin: '0 auto' }}>
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
                   <iframe
                     src={`https://www.youtube.com/embed/${ytId}`}
@@ -206,6 +206,21 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   const [subsectionData, setSubsectionData] = useState(null);
   const [loadingSubsection, setLoadingSubsection] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     fetch(`/api/help/${productSlug}/nav`)
@@ -370,6 +385,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         .content-body {
           padding: 3rem 4rem;
           max-width: 1200px;
+          flex: 1; /* Sticky footer: pushes footer down */
         }
 
         .content-title {
@@ -508,13 +524,13 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
         .article-richtext ul {
             list-style-type: disc;
-            padding-left: 1.5rem;
+            padding-left: 3rem;
             margin-bottom: 1rem;
         }
 
         .article-richtext ol {
             list-style-type: decimal;
-            padding-left: 1.5rem;
+            padding-left: 3rem;
             margin-bottom: 0.5rem;
         }
 
@@ -540,7 +556,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         }
         
         .article-richtext li {
-            margin-bottom: 0.125rem;
+            margin-bottom: 0.75rem;
         }
 
         .article-richtext strong {
@@ -675,16 +691,14 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
         {/* Sidebar */}
         <aside className={`sidebar-nav ${sidebarOpen ? 'open' : ''}`}>
-          
+
           <a href="/">
-          <div className="sidebar-header">
-            <div className="sidebar-logo">
-              <a href="/">
+            <div className="sidebar-header">
+              <div className="sidebar-logo">
                 <img src="/coreDev.png" alt="coreDev logo" />
-              </a>
+              </div>
+              <div className="sidebar-brand">Knowledge Base</div>
             </div>
-            <div className="sidebar-brand">Knowledge Base</div>
-          </div>
           </a>
 
           <div className="sidebar-content">
@@ -737,6 +751,29 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
               <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
             )}
           </div>
+
+          {/* Scroll to Top Button */}
+          {showScrollTop && (
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-20 right-8 p-3 bg-[#FF6C00] text-white rounded-full shadow-lg hover:bg-[#ff8c3a] transition-all transform hover:scale-110 z-50 group"
+              title="Back to top"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 10l7-7m0 0l7 7m-7-7v18"
+                />
+              </svg>
+            </button>
+          )}
 
           {/* FOOTER */}
           <footer className="bg-[#353635] border-t border-gray-300">

@@ -36,7 +36,7 @@ export default function ProductSections({ productId, productTitle }) {
     setLoading(true);
     try {
       const res = await axios.get(`/api/admin/products/${productId}/sections`);
-      setSections(res.data);
+      setSections(Array.isArray(res.data) ? res.data : (res.data.data || []));
     } finally {
       setLoading(false);
     }

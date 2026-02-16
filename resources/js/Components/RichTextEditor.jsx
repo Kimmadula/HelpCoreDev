@@ -12,6 +12,27 @@ import axios from 'axios';
 import Link from '@tiptap/extension-link';
 import ColorPicker from './ColorPicker';
 
+const IndentExtension = Extension.create({
+    name: 'indent',
+    addGlobalAttributes() {
+        return [
+            {
+                types: ['listItem'],
+                attributes: {
+                    indent: {
+                        default: 0,
+                        renderHTML: attributes => {
+                            if (attributes.indent === 0) return {};
+                            return { style: `margin-left: ${attributes.indent}px` };
+                        },
+                        parseHTML: element => element.style.marginLeft ? parseInt(element.style.marginLeft) : 0,
+                    }
+                }
+            }
+        ];
+    }
+});
+
 const TabExtension = Extension.create({
     name: 'tabHandler',
 
@@ -21,6 +42,34 @@ const TabExtension = Extension.create({
                 if (this.editor.can().sinkListItem('listItem')) {
                     return this.editor.commands.sinkListItem('listItem');
                 }
+
+                // Fallback: Indent the list item visually if sinking fails (e.g., first item)
+                const { state, dispatch } = this.editor.view;
+                const { selection } = state;
+                const { $from } = selection;
+
+                // Check if we are inside a list item
+                let listItem = $from.node($from.depth);
+                let depth = $from.depth;
+
+                // Traverse up to find listItem if not directly on it
+                while (listItem && listItem.type.name !== 'listItem' && depth > 0) {
+                    depth--;
+                    listItem = $from.node(depth);
+                }
+
+                if (listItem && listItem.type.name === 'listItem') {
+                    const currentIndent = listItem.attrs.indent || 0;
+                    const newIndent = Math.min(currentIndent + 20, 100); // Max indentation visual limit
+
+                    if (dispatch) {
+                        const pos = $from.before(depth);
+                        const tr = state.tr.setNodeMarkup(pos, null, { ...listItem.attrs, indent: newIndent });
+                        dispatch(tr);
+                        return true;
+                    }
+                }
+
                 this.editor.commands.insertContent('\u00A0\u00A0\u00A0\u00A0');
                 return true;
             },
@@ -28,6 +77,33 @@ const TabExtension = Extension.create({
                 if (this.editor.can().liftListItem('listItem')) {
                     return this.editor.commands.liftListItem('listItem');
                 }
+
+                // Fallback: Outdent visual indentation
+                const { state, dispatch } = this.editor.view;
+                const { selection } = state;
+                const { $from } = selection;
+
+                let listItem = $from.node($from.depth);
+                let depth = $from.depth;
+
+                while (listItem && listItem.type.name !== 'listItem' && depth > 0) {
+                    depth--;
+                    listItem = $from.node(depth);
+                }
+
+                if (listItem && listItem.type.name === 'listItem') {
+                    const currentIndent = listItem.attrs.indent || 0;
+                    if (currentIndent > 0) {
+                        const newIndent = Math.max(currentIndent - 20, 0);
+                        if (dispatch) {
+                            const pos = $from.before(depth);
+                            const tr = state.tr.setNodeMarkup(pos, null, { ...listItem.attrs, indent: newIndent });
+                            dispatch(tr);
+                            return true;
+                        }
+                    }
+                }
+
                 return false;
             },
         };
@@ -260,8 +336,8 @@ const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
                     onClick={onSave}
                     disabled={!isDirty || isSaving}
                     className={`ml-auto inline-flex items-center px-3 py-1.5 text-sm font-medium rounded transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${isDirty && !isSaving
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                            : 'bg-gray-100 text-gray-400'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                        : 'bg-gray-100 text-gray-400'
                         }`}
                 >
                     {isSaving ? (
@@ -306,6 +382,7 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
                 openOnClick: false,
                 autolink: true,
             }),
+            IndentExtension, // Add custom indentation attribute
             TabExtension, // Add the custom tab extension
         ],
         content: value,
@@ -360,13 +437,14 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
                 .ProseMirror p { margin-bottom: 0.5em; }
                 .ProseMirror h2 { margin-top: 1em; margin-bottom: 0.5em; font-weight: bold; font-size: 1.5em; }
                 .ProseMirror h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: bold; font-size: 1.25em; }
-                .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
-                .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
+                .ProseMirror ul { list-style-type: disc; padding-left: 3em; margin-bottom: 0.5em; }
+                .ProseMirror ol { list-style-type: decimal; padding-left: 3em; margin-bottom: 0.5em; }
                 .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
                 .ProseMirror a { color: #2563eb; text-decoration: underline; cursor: pointer; }
                 .ProseMirror { white-space: pre-wrap; }
                 .ProseMirror ul ul { list-style-type: circle; }
                 .ProseMirror ul ul ul { list-style-type: square; }
+                .ProseMirror li { margin-bottom: 0.5em; }
             `}</style>
         </div>
     );
