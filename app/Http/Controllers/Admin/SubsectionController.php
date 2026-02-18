@@ -8,6 +8,7 @@ use App\Models\Subsection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use App\Http\Requests\Admin\StoreSubsectionRequest;
 use App\Http\Requests\Admin\UpdateSubsectionRequest;
 use App\Http\Requests\Admin\ReorderRequest;
@@ -111,5 +112,19 @@ class SubsectionController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to reorder subsections', 'errors' => $e->getMessage()], 500);
         }
+    }
+
+    public function edit(Subsection $subsection)
+    {
+        $section = $subsection->section;
+        $product = $section->product;
+
+        return Inertia::render('Admin/SubsectionEditor', [
+            'subsectionId' => (int)$subsection->id,
+            'sectionId' => $subsection->section_id,
+            'subsectionTitle' => $subsection->title,
+            'sectionTitle' => $section->title,
+            'productTitle' => $product->name,
+        ]);
     }
 }

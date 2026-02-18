@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
@@ -69,6 +70,7 @@ class ProductController extends Controller
         }
     }
 
+
     public function destroy(Product $product)
     {
         try {
@@ -77,5 +79,13 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to delete product', 'errors' => $e->getMessage()], 500);
         }
+    }
+
+    public function showSections(Product $product)
+    {
+        return Inertia::render('Admin/ProductSections', [
+            'productId' => (int)$product->id,
+            'productTitle' => $product->name
+        ]);
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\ReorderRequest;
 use App\Services\SortingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class SectionController extends Controller
 {
@@ -79,6 +80,7 @@ class SectionController extends Controller
         }
     }
 
+
     public function reorder(ReorderRequest $request, Product $product, SortingService $sortingService)
     {
         try {
@@ -94,5 +96,16 @@ class SectionController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to reorder sections', 'errors' => $e->getMessage()], 500);
         }
+    }
+
+    public function showSubsections(Section $section)
+    {
+        $product = $section->product;
+        return Inertia::render('Admin/SectionSubsections', [
+            'sectionId' => (int)$section->id,
+            'productId' => $section->product_id,
+            'sectionTitle' => $section->title,
+            'productTitle' => $product->name
+        ]);
     }
 }

@@ -7,16 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class SortingService
 {
-    /**
-     * Reorder items based on the provided list of IDs.
-     *
-     * @param string $modelClass The fully qualified class name of the model.
-     * @param array $orderedIds The list of IDs in the desired order.
-     * @param string|null $parentIdColumn The column name for the parent relationship (optional).
-     * @param int|string|null $parentId The ID of the parent (optional).
-     * @return void
-     * @throws \Exception If an invalid ID is provided.
-     */
     public function reorder(string $modelClass, array $orderedIds, ?string $parentIdColumn = null, $parentId = null): void
     {
         // 1. Validate that all IDs belong to the parent (if applicable) and exist.
