@@ -91,20 +91,16 @@ export default function ProductSections({ productId, productTitle }) {
     const swapWith = direction === "up" ? index - 1 : index + 1;
     if (swapWith < 0 || swapWith >= newArr.length) return;
 
-    // 1. Optimistic Update
     const previousSections = [...sections];
     [newArr[index], newArr[swapWith]] = [newArr[swapWith], newArr[index]];
     setSections(newArr);
 
     try {
-      // 2. Background Request
       await axios.put(`/api/admin/products/${productId}/sections/reorder`, {
         ordered_ids: newArr.map((s) => s.id),
       });
-      // Success: No need to reload, we already have the new state.
     } catch (error) {
       console.error("Reorder failed:", error);
-      // 3. Rollback on Error
       setSections(previousSections);
       toast.error("Failed to reorder sections. Please try again.");
     }
@@ -131,9 +127,8 @@ export default function ProductSections({ productId, productTitle }) {
       <div className="py-2">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="space-y-6">
+            
             {/* Back Navigation */}
-
-
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Sections</h3>

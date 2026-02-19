@@ -78,7 +78,6 @@ export default function SubsectionEditor({ subsectionId, sectionId, subsectionTi
     }
   };
 
-  // Logic to prevent adding more blocks if one exists
   const hasBlock = blocks.length > 0;
 
   return (

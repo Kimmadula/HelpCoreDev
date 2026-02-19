@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { alignClass, imageAlignStyle, getYouTubeId, getImageUrl } from "@/Utils/articleContent";
+import '../../../css/editor.css';
 
 export default function ArticleRenderer({ blocks }) {
     if (!blocks?.length) {
@@ -110,11 +111,31 @@ export default function ArticleRenderer({ blocks }) {
                 // RICH TEXT
                 if (b.type === "richtext") {
                     const cls = alignClass(b.align);
+                    let content = b.text ?? "";
+
+                    // Auto-embed YouTube links
+                    content = content.replace(/<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1[^>]*>.*?<\/a>/gi, (match, quote, url) => {
+                        const ytId = getYouTubeId(url);
+                        if (ytId) {
+                            return `
+                                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin-bottom: 1em;">
+                                    <iframe 
+                                        src="https://www.youtube.com/embed/${ytId}" 
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen
+                                    ></iframe>
+                                </div>
+                            `;
+                        }
+                        return match;
+                    });
+
                     return (
                         <div
                             key={b.id}
                             className={`article-richtext ${cls}`}
-                            dangerouslySetInnerHTML={{ __html: b.text ?? "" }}
+                            dangerouslySetInnerHTML={{ __html: content }}
                         />
                     );
                 }

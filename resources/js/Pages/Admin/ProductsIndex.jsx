@@ -27,28 +27,26 @@ export default function ProductsIndex() {
 
   const products = Array.isArray(rawProducts) ? rawProducts : (rawProducts?.data || []);
 
-  // Load products on mount
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
-  // Derived State
   const publishedCount = products.filter(p => p.is_published).length;
   const draftCount = products.length - publishedCount;
 
-  // Create Modal State
+  // Create Modal
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [isPublished, setIsPublished] = useState(true);
 
-  // Edit Modal State
+  // Edit Modal 
   const [editingProduct, setEditingProduct] = useState(null);
   const [editName, setEditName] = useState("");
   const [editSlug, setEditSlug] = useState("");
   const [editPublished, setEditPublished] = useState(true);
 
-  // Delete Modal State
+  // Delete Modal 
   const [deletingProduct, setDeletingProduct] = useState(null);
 
   const handleCreate = async (e) => {
@@ -65,7 +63,7 @@ export default function ProductsIndex() {
       setIsPublished(true);
       setShowCreateModal(false);
     } catch {
-      // Error handled by useCrud toast
+
     }
   };
 
@@ -94,7 +92,7 @@ export default function ProductsIndex() {
       });
       cancelEdit();
     } catch {
-      // Error handled by useCrud
+
     }
   };
 
@@ -104,7 +102,7 @@ export default function ProductsIndex() {
       await deleteItem(deletingProduct.id);
       setDeletingProduct(null);
     } catch {
-      // Error handled by useCrud
+      
     }
   };
 

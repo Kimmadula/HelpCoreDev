@@ -482,7 +482,6 @@ export default function MainLanding() {
                   </div>
                 )}
 
-                {/* No results message */}
                 {showSuggestions && !searchLoading && q.trim().length > 1 && searchResults.length === 0 && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 animate-fadeIn">
                     <div className="px-6 py-8 text-center text-gray-500">

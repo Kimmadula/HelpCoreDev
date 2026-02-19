@@ -21,7 +21,7 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
 
   const [deletingId, setDeletingId] = useState(null);
 
-  // Create Modal State
+  // Create Modal 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const toast = useToast();
 
@@ -97,20 +97,16 @@ export default function SectionSubsections({ sectionId, productId, sectionTitle,
     const swapWith = direction === "up" ? index - 1 : index + 1;
     if (swapWith < 0 || swapWith >= newArr.length) return;
 
-    // 1. Optimistic Update
     const previousSubsections = [...subsections];
     [newArr[index], newArr[swapWith]] = [newArr[swapWith], newArr[index]];
     setSubsections(newArr);
 
     try {
-      // 2. Background Request
       await axios.put(`/api/admin/sections/${sectionId}/subsections/reorder`, {
         ordered_ids: newArr.map((s) => s.id),
       });
-      // Success: No need to reload
     } catch (error) {
       console.error("Reorder failed:", error);
-      // 3. Rollback
       setSubsections(previousSubsections);
       toast.error("Failed to reorder subsections. Please try again.");
     }

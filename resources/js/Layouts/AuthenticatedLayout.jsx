@@ -6,19 +6,17 @@ import Dropdown from '@/Components/Dropdown';
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
 
-    // Initialize sidebar based on localStorage or screen size
     const [showingSidebar, setShowingSidebar] = useState(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('sidebar-open');
             if (saved !== null) {
                 return JSON.parse(saved);
             }
-            return window.innerWidth >= 1024; // Default open on large screens
+            return window.innerWidth >= 1024; 
         }
-        return false; // Default closed for SSR/initial render
+        return false; 
     });
 
-    // Persist state to localStorage
     useEffect(() => {
         if (typeof window !== 'undefined') {
             localStorage.setItem('sidebar-open', JSON.stringify(showingSidebar));
@@ -27,11 +25,8 @@ export default function AuthenticatedLayout({ header, children }) {
 
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
+
             {/* Sidebar */}
-            {/* 
-                Mobile: fixed, transform translates in/out. Width always 64.
-                Desktop: relative (static in flex), width animates 0 <-> 64.
-            */}
             <aside
                 className={`
                     fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-slate-800 to-slate-900 text-white transition-all duration-300 ease-in-out flex flex-col
@@ -41,7 +36,6 @@ export default function AuthenticatedLayout({ header, children }) {
                     ${showingSidebar ? 'lg:w-64' : 'lg:w-0 lg:overflow-hidden'}
                 `}
             >
-                {/* Content Wrapper - helps with clean hiding when width is 0 */}
                 <div className={`flex flex-col h-full ${!showingSidebar && 'lg:hidden'}`}>
                     <div className="p-6">
                         <div className="flex items-center gap-3 mb-8">
@@ -50,7 +44,6 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                             <span className="text-xl font-bold whitespace-nowrap">Knowledge Base</span>
 
-                            {/* Mobile close button */}
                             <button
                                 className="ml-auto lg:hidden text-gray-400 hover:text-white"
                                 onClick={() => setShowingSidebar(false)}
@@ -90,7 +83,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         </nav>
                     </div>
 
-                    {/* Logout at bottom */}
+                    {/* LOGOUT*/}
                     <div className="mt-auto p-4 border-t border-slate-700">
                         <Link
                             href={route('logout')}
@@ -107,7 +100,6 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
             </aside>
 
-            {/* Backdrop for mobile sidebar */}
             {showingSidebar && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -121,7 +113,6 @@ export default function AuthenticatedLayout({ header, children }) {
                 <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            {/* Hamburger Menu - Visible on all screens */}
                             <button
                                 onClick={() => setShowingSidebar(!showingSidebar)}
                                 className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -131,7 +122,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </svg>
                             </button>
 
-                            {/* Dynamic Title */}
                             <div className="text-xl font-semibold text-gray-800">
                                 {header || 'Dashboard'}
                             </div>
@@ -155,7 +145,6 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </header>
 
-                {/* Scrollable Page Content */}
                 <main className="flex-1 overflow-y-auto bg-gray-50">
                     <div className="p-6 max-w-7xl mx-auto">
                         {children}

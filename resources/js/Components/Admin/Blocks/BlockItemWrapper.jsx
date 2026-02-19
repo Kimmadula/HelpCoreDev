@@ -63,6 +63,21 @@ export default function BlockItemWrapper({ block, onDelete, onUpdate }) {
         }
     };
 
+    const handleTextChange = (newText) => {
+        setLocalText(newText);
+        setIsDirty(newText !== (block.text ?? ""));
+    };
+
+    const handleHeadingLevelChange = (newLevel) => {
+        setLocalHeadingLevel(newLevel);
+        setIsDirty(newLevel !== (block.heading_level ?? 2) || localText !== (block.text ?? ""));
+    };
+
+    const handleImageWidthChange = (newWidth) => {
+        setLocalImageWidth(newWidth);
+        setIsDirty(newWidth !== (block.image_width ?? "md"));
+    };
+
     return (
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm transition-all mb-6">
             {/* Header */}
@@ -120,26 +135,23 @@ export default function BlockItemWrapper({ block, onDelete, onUpdate }) {
                 {block.type === "heading" && (
                     <HeadingEditor
                         localHeadingLevel={localHeadingLevel}
-                        setLocalHeadingLevel={setLocalHeadingLevel}
+                        onChangeLevel={handleHeadingLevelChange}
                         localText={localText}
-                        setLocalText={setLocalText}
-                        setIsDirty={setIsDirty}
+                        onChangeText={handleTextChange}
                     />
                 )}
 
                 {block.type === "paragraph" && (
                     <ParagraphEditor
                         localText={localText}
-                        setLocalText={setLocalText}
-                        setIsDirty={setIsDirty}
+                        onChange={handleTextChange}
                     />
                 )}
 
                 {block.type === "richtext" && (
                     <RichTextBlocksEditor
                         localText={localText}
-                        setLocalText={setLocalText}
-                        setIsDirty={setIsDirty}
+                        onChange={handleTextChange}
                         handleSave={handleSave}
                         isSaving={isSaving}
                         isDirty={isDirty}
@@ -150,8 +162,7 @@ export default function BlockItemWrapper({ block, onDelete, onUpdate }) {
                     <ImageEditor
                         block={block}
                         localImageWidth={localImageWidth}
-                        setLocalImageWidth={setLocalImageWidth}
-                        setIsDirty={setIsDirty}
+                        onChangeWidth={handleImageWidthChange}
                     />
                 )}
 

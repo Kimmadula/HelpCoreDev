@@ -9,12 +9,6 @@ use Illuminate\Support\Collection;
 
 class SearchService
 {
-    /**
-     * Search for products, sections, and subsections.
-     *
-     * @param string $query
-     * @return Collection
-     */
     public function search(string $query): Collection
     {
         if (empty($query)) {

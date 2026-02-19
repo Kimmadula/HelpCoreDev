@@ -27,7 +27,6 @@ class SortingService
         // 2. Update the order_index for each item
         DB::transaction(function () use ($modelClass, $orderedIds) {
             foreach ($orderedIds as $index => $id) {
-                // Ensure we only update the specific records
                 $modelClass::where('id', $id)->update(['order_index' => $index + 1]);
             }
         });

@@ -2,7 +2,7 @@ import RichTextEditor from "@/Components/RichTextEditor";
 import ComponentErrorBoundary from "@/Components/ComponentErrorBoundary";
 import { getYouTubeId, getImageUrl } from "@/Utils/articleContent";
 
-export function HeadingEditor({ localHeadingLevel, setLocalHeadingLevel, localText, setLocalText, setIsDirty }) {
+export function HeadingEditor({ localHeadingLevel, onChangeLevel, localText, onChangeText }) {
     return (
         <div className="space-y-3">
             <div>
@@ -11,7 +11,7 @@ export function HeadingEditor({ localHeadingLevel, setLocalHeadingLevel, localTe
                     {[2, 3].map(lvl => (
                         <button
                             key={lvl}
-                            onClick={() => { setLocalHeadingLevel(lvl); setIsDirty(true); }}
+                            onClick={() => onChangeLevel(lvl)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${localHeadingLevel === lvl
                                 ? 'bg-gray-800 text-white'
                                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -28,7 +28,7 @@ export function HeadingEditor({ localHeadingLevel, setLocalHeadingLevel, localTe
                     type="text"
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     value={localText}
-                    onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
+                    onChange={(e) => onChangeText(e.target.value)}
                     placeholder="Enter heading text"
                 />
             </div>
@@ -36,7 +36,7 @@ export function HeadingEditor({ localHeadingLevel, setLocalHeadingLevel, localTe
     );
 }
 
-export function ParagraphEditor({ localText, setLocalText, setIsDirty }) {
+export function ParagraphEditor({ localText, onChange }) {
     return (
         <div className="space-y-3">
             {(() => {
@@ -59,7 +59,7 @@ export function ParagraphEditor({ localText, setLocalText, setIsDirty }) {
                 <textarea
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y min-h-[120px]"
                     value={localText}
-                    onChange={(e) => { setLocalText(e.target.value); setIsDirty(true); }}
+                    onChange={(e) => onChange(e.target.value)}
                     placeholder="Write your content here..."
                 />
                 <p className="text-xs text-gray-500 mt-1">Markdown supported</p>
@@ -68,7 +68,7 @@ export function ParagraphEditor({ localText, setLocalText, setIsDirty }) {
     );
 }
 
-export function ImageEditor({ block, localImageWidth, setLocalImageWidth, setIsDirty }) {
+export function ImageEditor({ block, localImageWidth, onChangeWidth }) {
     return (
         <div className="space-y-3">
             {block.image_path && (
@@ -96,7 +96,7 @@ export function ImageEditor({ block, localImageWidth, setLocalImageWidth, setIsD
                     {['sm', 'md', 'lg', 'full'].map(w => (
                         <button
                             key={w}
-                            onClick={() => { setLocalImageWidth(w); setIsDirty(true); }}
+                            onClick={() => onChangeWidth(w)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${localImageWidth === w
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -144,13 +144,13 @@ export function ListEditor({ block, onUpdate }) {
     );
 }
 
-export function RichTextBlocksEditor({ localText, setLocalText, setIsDirty, handleSave, isSaving, isDirty }) {
+export function RichTextBlocksEditor({ localText, onChange, handleSave, isSaving, isDirty }) {
     return (
         <div>
             <ComponentErrorBoundary>
                 <RichTextEditor
                     value={localText}
-                    onChange={(html) => { setLocalText(html); setIsDirty(true); }}
+                    onChange={onChange}
                     onSave={handleSave}
                     isSaving={isSaving}
                     isDirty={isDirty}

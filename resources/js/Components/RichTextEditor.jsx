@@ -1,23 +1,73 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
+import FontFamily from '@tiptap/extension-font-family';
 import textAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 import Image from '@tiptap/extension-image';
 import { Extension } from '@tiptap/core';
 import axios from 'axios';
 import Link from '@tiptap/extension-link';
+import DOMPurify from 'dompurify';
 import ColorPicker from './ColorPicker';
+import '../../css/editor.css';
 
-const IndentExtension = Extension.create({
-    name: 'indent',
+// Custom Font Size Extension
+const FontSize = Extension.create({
+    name: 'fontSize',
+    addOptions() {
+        return {
+            types: ['textStyle'],
+        };
+    },
     addGlobalAttributes() {
         return [
             {
-                types: ['listItem'],
+                types: this.options.types,
+                attributes: {
+                    fontSize: {
+                        default: null,
+                        parseHTML: element => element.style.fontSize.replace('px', ''),
+                        renderHTML: attributes => {
+                            if (!attributes.fontSize) {
+                                return {};
+                            }
+                            return {
+                                style: `font-size: ${attributes.fontSize}px`,
+                            };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setFontSize: fontSize => ({ chain }) => {
+                return chain()
+                    .setMark('textStyle', { fontSize })
+                    .run();
+            },
+            unsetFontSize: () => ({ chain }) => {
+                return chain()
+                    .setMark('textStyle', { fontSize: null })
+                    .removeEmptyTextStyle()
+                    .run();
+            },
+        };
+    },
+});
+
+const IndentationExtension = Extension.create({
+    name: 'indentation',
+
+    addGlobalAttributes() {
+        return [
+            {
+                types: ['listItem', 'paragraph', 'heading'],
                 attributes: {
                     indent: {
                         default: 0,
@@ -30,11 +80,31 @@ const IndentExtension = Extension.create({
                 }
             }
         ];
-    }
-});
+    },
 
-const TabExtension = Extension.create({
-    name: 'tabHandler',
+    addCommands() {
+        return {
+            indent: () => ({ tr, state, dispatch }) => {
+                const { selection } = state;
+                const { $from } = selection;
+
+                if (state.schema.nodes.listItem) {
+                    const listItem = $from.node($from.depth);
+                    if (listItem && listItem.type.name === 'listItem') {
+                        if (dispatch) {
+                            try {
+                            } catch (e) { }
+                        }
+                    }
+                }
+
+                return false;
+            },
+            outdent: () => ({ tr, state, dispatch }) => {
+                return false;
+            }
+        }
+    },
 
     addKeyboardShortcuts() {
         return {
@@ -43,71 +113,87 @@ const TabExtension = Extension.create({
                     return this.editor.commands.sinkListItem('listItem');
                 }
 
-                // Fallback: Indent the list item visually if sinking fails (e.g., first item)
+                // Custom indent logic
                 const { state, dispatch } = this.editor.view;
                 const { selection } = state;
                 const { $from } = selection;
 
-                // Check if we are inside a list item
-                let listItem = $from.node($from.depth);
-                let depth = $from.depth;
+                let targetNode = null;
+                let targetPos = -1;
 
-                // Traverse up to find listItem if not directly on it
-                while (listItem && listItem.type.name !== 'listItem' && depth > 0) {
-                    depth--;
-                    listItem = $from.node(depth);
+                // Try to find 'listItem' ancestor
+                for (let d = $from.depth; d > 0; d--) {
+                    const node = $from.node(d);
+                    if (node.type.name === 'listItem') {
+                        targetNode = node;
+                        targetPos = $from.before(d);
+                        break;
+                    }
                 }
 
-                if (listItem && listItem.type.name === 'listItem') {
-                    const currentIndent = listItem.attrs.indent || 0;
-                    const newIndent = Math.min(currentIndent + 20, 100); // Max indentation visual limit
+                // Fallback to current node if not in a list
+                if (!targetNode) {
+                    targetNode = $from.node($from.depth);
+                    targetPos = $from.before($from.depth);
+                }
+
+                // Apply indent
+                if (targetNode && (['listItem', 'paragraph', 'heading'].includes(targetNode.type.name))) {
+                    const currentIndent = targetNode.attrs.indent || 0;
+                    const newIndent = Math.min(currentIndent + 20, 100); // Max 100px
 
                     if (dispatch) {
-                        const pos = $from.before(depth);
-                        const tr = state.tr.setNodeMarkup(pos, null, { ...listItem.attrs, indent: newIndent });
+                        const tr = state.tr.setNodeMarkup(targetPos, null, { ...targetNode.attrs, indent: newIndent });
                         dispatch(tr);
                         return true;
                     }
                 }
 
-                this.editor.commands.insertContent('\u00A0\u00A0\u00A0\u00A0');
-                return true;
+                return this.editor.commands.insertContent('\t');
             },
             'Shift-Tab': () => {
                 if (this.editor.can().liftListItem('listItem')) {
                     return this.editor.commands.liftListItem('listItem');
                 }
 
-                // Fallback: Outdent visual indentation
                 const { state, dispatch } = this.editor.view;
                 const { selection } = state;
                 const { $from } = selection;
 
-                let listItem = $from.node($from.depth);
-                let depth = $from.depth;
+                let targetNode = null;
+                let targetPos = -1;
 
-                while (listItem && listItem.type.name !== 'listItem' && depth > 0) {
-                    depth--;
-                    listItem = $from.node(depth);
+                // Try to find 'listItem' ancestor
+                for (let d = $from.depth; d > 0; d--) {
+                    const node = $from.node(d);
+                    if (node.type.name === 'listItem') {
+                        targetNode = node;
+                        targetPos = $from.before(d);
+                        break;
+                    }
                 }
 
-                if (listItem && listItem.type.name === 'listItem') {
-                    const currentIndent = listItem.attrs.indent || 0;
+                if (!targetNode) {
+                    targetNode = $from.node($from.depth);
+                    targetPos = $from.before($from.depth);
+                }
+
+                // Apply dedent
+                if (targetNode && (['listItem', 'paragraph', 'heading'].includes(targetNode.type.name))) {
+                    const currentIndent = targetNode.attrs.indent || 0;
                     if (currentIndent > 0) {
                         const newIndent = Math.max(currentIndent - 20, 0);
                         if (dispatch) {
-                            const pos = $from.before(depth);
-                            const tr = state.tr.setNodeMarkup(pos, null, { ...listItem.attrs, indent: newIndent });
+                            const tr = state.tr.setNodeMarkup(targetPos, null, { ...targetNode.attrs, indent: newIndent });
                             dispatch(tr);
                             return true;
                         }
                     }
                 }
-
                 return false;
-            },
+            }
         };
-    },
+    }
 });
 
 const uploadImage = async (file, view) => {
@@ -142,45 +228,54 @@ const uploadImage = async (file, view) => {
     return false;
 };
 
-const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
+const buttonClass = (isActive) =>
+    `p-1.5 rounded transition ${isActive
+        ? 'bg-gray-800 text-white'
+        : 'text-gray-600 hover:bg-gray-200'
+    }`;
+
+const MenuBar = memo(({ editor, onSave, isSaving, isDirty, isUploading, onImageUpload }) => {
     const fileInputRef = useRef(null);
 
     if (!editor) {
         return null;
     }
 
-    const addYoutubeVideo = () => {
-        const url = prompt('Enter YouTube URL');
+    const setLink = useCallback(() => {
+        const previousUrl = editor.getAttributes('link').href;
+        const url = window.prompt('URL', previousUrl);
 
-        if (url) {
-            editor.commands.setYoutubeVideo({
-                src: url,
-                width: 640,
-                height: 480,
-            })
+        // cancelled
+        if (url === null) {
+            return;
         }
-    }
 
-    const triggerImageUpload = () => {
+        // empty
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
+        }
+
+        // update
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    }, [editor]);
+
+    const triggerImageUpload = useCallback(() => {
         fileInputRef.current?.click();
-    };
+    }, []);
 
-    const handleImageChange = async (event) => {
+    const handleImageChange = useCallback(async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        await uploadImage(file, editor.view);
+        if (onImageUpload) {
+            await onImageUpload(file, editor.view);
+        }
 
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
-    };
-
-    const buttonClass = (isActive) =>
-        `p-1.5 rounded transition ${isActive
-            ? 'bg-gray-800 text-white'
-            : 'text-gray-600 hover:bg-gray-200'
-        }`;
+    }, [editor, onImageUpload]);
 
     return (
         <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white rounded-t-lg sticky top-0 z-20 items-center justify-between">
@@ -200,8 +295,9 @@ const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
                         disabled={!editor.can().chain().focus().toggleBold().run()}
                         className={buttonClass(editor.isActive('bold'))}
                         title="Bold"
-                        type="button"
-                    >
+                        aria-label="Bold"
+                        aria-pressed={editor.isActive('bold')}
+                        type="button">
                         <strong>B</strong>
                     </button>
                     <button
@@ -209,44 +305,166 @@ const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
                         disabled={!editor.can().chain().focus().toggleItalic().run()}
                         className={buttonClass(editor.isActive('italic'))}
                         title="Italic"
-                        type="button"
-                    >
+                        aria-label="Italic"
+                        aria-pressed={editor.isActive('italic')}
+                        type="button">
                         <em>I</em>
                     </button>
                     <button
                         onClick={() => editor.chain().focus().toggleUnderline().run()}
                         className={buttonClass(editor.isActive('underline'))}
                         title="Underline"
-                        type="button"
-                    >
+                        aria-label="Underline"
+                        aria-pressed={editor.isActive('underline')}
+                        type="button">
                         <u>U</u>
                     </button>
+                    <ColorPicker editor={editor} />
                     <button
-                        onClick={() => editor.chain().focus().toggleStrike().run()}
-                        className={buttonClass(editor.isActive('strike'))}
-                        title="Strikethrough"
-                        type="button"
-                    >
-                        <s>S</s>
+                        onClick={setLink}
+                        className={buttonClass(editor.isActive('link'))}
+                        title="Add Link"
+                        aria-label="Add Link"
+                        aria-pressed={editor.isActive('link')}
+                        type="button">
+                        🔗
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().unsetLink().run()}
+                        disabled={!editor.isActive('link')}
+                        className={buttonClass(false)}
+                        title="Remove Link"
+                        aria-label="Remove Link"
+                        type="button">
+                        🚫
                     </button>
                 </div>
 
                 <div className="flex gap-1 px-2 border-r border-gray-300">
+                    {/* Heading Dropdown */}
+                    <select
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === 'paragraph') {
+                                editor.chain().focus().setParagraph().run();
+                            } else {
+                                editor.chain().focus().toggleHeading({ level: parseInt(value) }).run();
+                            }
+                        }}
+                        value={
+                            editor.isActive('heading', { level: 1 }) ? '1' :
+                                editor.isActive('heading', { level: 2 }) ? '2' :
+                                    editor.isActive('heading', { level: 3 }) ? '3' :
+                                        editor.isActive('heading', { level: 4 }) ? '4' :
+                                            editor.isActive('heading', { level: 5 }) ? '5' :
+                                                editor.isActive('heading', { level: 6 }) ? '6' :
+                                                    'paragraph'
+                        }
+                        className="p-1.5 text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 min-w-[100px]"
+                        title="Text Type"
+                        aria-label="Text Type">
+                        <option value="paragraph">Paragraph</option>
+                        <option value="1">Heading 1</option>
+                        <option value="2">Heading 2</option>
+                        <option value="3">Heading 3</option>
+                        <option value="4">Heading 4</option>
+                        <option value="5">Heading 5</option>
+                        <option value="6">Heading 6</option>
+                    </select>
+
+                    {/* Font Family Dropdown */}
+                    <select
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value) {
+                                editor.chain().focus().setFontFamily(value).run();
+                            } else {
+                                editor.chain().focus().unsetFontFamily().run();
+                            }
+                        }}
+                        value={editor.getAttributes('textStyle').fontFamily || ''}
+                        className="p-1.5 text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 min-w-[120px]"
+                        title="Font Family"
+                        aria-label="Font Family">
+                        <option value="">Default Font</option>
+                        <option value="Inter, sans-serif">Inter</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Times New Roman, serif">Times New Roman</option>
+                        <option value="Courier New, monospace">Courier New</option>
+                    </select>
+
+                    {/* Font Size Dropdown */}
+                    <select
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value) {
+                                editor.chain().focus().setFontSize(value).run();
+                            } else {
+                                editor.chain().focus().unsetFontSize().run();
+                            }
+                        }}
+                        value={editor.getAttributes('textStyle').fontSize || ''}
+                        className="p-1.5 text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 w-20"
+                        title="Font Size"
+                        aria-label="Font Size">
+                        <option value="">Size</option>
+                        <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="20">20</option>
+                        <option value="24">24</option>
+                        <option value="30">30</option>
+                        <option value="36">36</option>
+                        <option value="48">48</option>
+                        <option value="60">60</option>
+                        <option value="72">72</option>
+                    </select>
+
                     <button
-                        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                        className={buttonClass(editor.isActive('heading', { level: 2 }))}
-                        title="Heading 2"
-                        type="button"
-                    >
-                        H2
+                        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'left' }))}
+                        title="Align Left"
+                        aria-label="Align Left"
+                        aria-pressed={editor.isActive({ textAlign: 'left' })}
+                        type="button">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h16" />
+                        </svg>
                     </button>
                     <button
-                        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                        className={buttonClass(editor.isActive('heading', { level: 3 }))}
-                        title="Heading 3"
-                        type="button"
-                    >
-                        H3
+                        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'center' }))}
+                        title="Align Center"
+                        aria-label="Align Center"
+                        aria-pressed={editor.isActive({ textAlign: 'center' })}
+                        type="button">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 12h10M7 18h10" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'right' }))}
+                        title="Align Right"
+                        aria-label="Align Right"
+                        aria-pressed={editor.isActive({ textAlign: 'right' })}
+                        type="button">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 12h10M4 18h16" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                        className={buttonClass(editor.isActive({ textAlign: 'justify' }))}
+                        title="Justify"
+                        aria-label="Justify"
+                        aria-pressed={editor.isActive({ textAlign: 'justify' })}
+                        type="button">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
                     </button>
                 </div>
 
@@ -255,78 +473,33 @@ const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
                         onClick={() => editor.chain().focus().toggleBulletList().run()}
                         className={buttonClass(editor.isActive('bulletList'))}
                         title="Bullet List"
-                        type="button"
-                    >
+                        aria-label="Bullet List"
+                        aria-pressed={editor.isActive('bulletList')}
+                        type="button">
                         • List
                     </button>
                     <button
                         onClick={() => editor.chain().focus().toggleOrderedList().run()}
                         className={buttonClass(editor.isActive('orderedList'))}
                         title="Ordered List"
-                        type="button"
-                    >
+                        aria-label="Ordered List"
+                        aria-pressed={editor.isActive('orderedList')}
+                        type="button">
                         1. List
                     </button>
                 </div>
 
-                <div className="flex gap-1 px-2 border-r border-gray-300">
-                    <button
-                        onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                        className={buttonClass(editor.isActive({ textAlign: 'left' }))}
-                        title="Left"
-                        type="button"
-                    >
-                        Left
-                    </button>
-                    <button
-                        onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                        className={buttonClass(editor.isActive({ textAlign: 'center' }))}
-                        title="Center"
-                        type="button"
-                    >
-                        Center
-                    </button>
-                    <button
-                        onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                        className={buttonClass(editor.isActive({ textAlign: 'right' }))}
-                        title="Right"
-                        type="button"
-                    >
-                        Right
-                    </button>
-                    <button
-                        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-                        className={buttonClass(editor.isActive({ textAlign: 'justify' }))}
-                        title="Justify"
-                        type="button"
-                    >
-                        Justify
-                    </button>
-                </div>
+                <button
+                    onClick={triggerImageUpload}
+                    className={buttonClass(editor.isActive('image'))}
+                    title="Add Image"
+                    aria-label="Add Image"
+                    disabled={isUploading}
+                    type="button"
+                >
+                    {isUploading ? '...' : '🖼'}
+                </button>
 
-
-                <div className="flex gap-1 px-2 border-r border-gray-300">
-                    <button
-                        onClick={addYoutubeVideo}
-                        className={buttonClass(editor.isActive('youtube'))}
-                        title="Add Video"
-                        type="button"
-                    >
-                        ▶ Video
-                    </button>
-                    <button
-                        onClick={triggerImageUpload}
-                        className={buttonClass(editor.isActive('image'))}
-                        title="Add Image"
-                        type="button"
-                    >
-                        🖼 Image
-                    </button>
-                </div>
-
-                <div className="flex gap-1 px-2">
-                    <ColorPicker editor={editor} />
-                </div>
             </div>
 
             {/* Save Button in Toolbar */}
@@ -360,21 +533,32 @@ const MenuBar = ({ editor, onSave, isSaving, isDirty }) => {
             )}
         </div>
     );
-};
+});
 
 export default function RichTextEditor({ value, onChange, onSave, isSaving, isDirty }) {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const onImageUpload = useCallback(async (file, view) => {
+        setIsUploading(true);
+        try {
+            await uploadImage(file, view);
+        } finally {
+            setIsUploading(false);
+        }
+    }, []);
+
     const editor = useEditor({
         extensions: [
             StarterKit,
             Underline,
             TextStyle,
             Color,
+            FontFamily,
+            FontSize,
             textAlign.configure({
                 types: ['heading', 'paragraph'],
             }),
-            Youtube.configure({
-                controls: false,
-            }),
+            // Youtube removed from editor
             Image.configure({
                 inline: true,
             }),
@@ -382,8 +566,7 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
                 openOnClick: false,
                 autolink: true,
             }),
-            IndentExtension, // Add custom indentation attribute
-            TabExtension, // Add the custom tab extension
+            IndentationExtension,
         ],
         content: value,
         editorProps: {
@@ -398,7 +581,7 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
                             event.preventDefault();
                             const file = item.getAsFile();
                             if (file) {
-                                uploadImage(file, view);
+                                onImageUpload(file, view);
                                 return true;
                             }
                         }
@@ -411,7 +594,7 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
                     const file = event.dataTransfer.files[0];
                     if (file.type.startsWith("image")) {
                         event.preventDefault();
-                        uploadImage(file, view);
+                        onImageUpload(file, view);
                         return true;
                     }
                 }
@@ -419,33 +602,28 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
             }
         },
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            const cleanContent = DOMPurify.sanitize(editor.getHTML());
+            onChange(cleanContent);
         },
     });
 
     useEffect(() => {
-        if (editor && value === "") {
-            editor.commands.clearContent();
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value, false);
         }
     }, [editor, value]);
 
     return (
         <div className="border border-gray-200 rounded-lg shadow-sm bg-white">
-            <MenuBar editor={editor} onSave={onSave} isSaving={isSaving} isDirty={isDirty} />
+            <MenuBar
+                editor={editor}
+                onSave={onSave}
+                isSaving={isSaving}
+                isDirty={isDirty}
+                isUploading={isUploading}
+                onImageUpload={onImageUpload}
+            />
             <EditorContent editor={editor} />
-            <style>{`
-                .ProseMirror p { margin-bottom: 0.5em; }
-                .ProseMirror h2 { margin-top: 1em; margin-bottom: 0.5em; font-weight: bold; font-size: 1.5em; }
-                .ProseMirror h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: bold; font-size: 1.25em; }
-                .ProseMirror ul { list-style-type: disc; padding-left: 3em; margin-bottom: 0.5em; }
-                .ProseMirror ol { list-style-type: decimal; padding-left: 3em; margin-bottom: 0.5em; }
-                .ProseMirror blockquote { border-left: 3px solid #ccc; padding-left: 1em; color: #666; font-style: italic; }
-                .ProseMirror a { color: #2563eb; text-decoration: underline; cursor: pointer; }
-                .ProseMirror { white-space: pre-wrap; }
-                .ProseMirror ul ul { list-style-type: circle; }
-                .ProseMirror ul ul ul { list-style-type: square; }
-                .ProseMirror li { margin-bottom: 0.5em; }
-            `}</style>
         </div>
     );
 }

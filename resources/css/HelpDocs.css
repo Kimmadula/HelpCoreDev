@@ -58,7 +58,6 @@
   font-size: 0.9375rem;
   font-weight: 700;
   color: #1a1a1a;
-  /* Margin moved to CollapsibleSection logic */
   padding: 0 0.5rem;
 }
 
@@ -104,16 +103,15 @@
 }
 
 .content-header {
-  /* background: linear-gradient(135deg, #595755 0%, #6d6b69 50%, #595755 100%); */
   background-color: #353635;
   height: 60px;
   flex-shrink: 0;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   position: relative;
-  display: flex; 
-  align-items: center; 
-  justify-content: flex-end; 
-  padding: 0 2rem; 
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 2rem;
 }
 
 .content-header::after {
@@ -129,7 +127,7 @@
 .content-body {
   padding: 3rem 4rem;
   max-width: 1200px;
-  flex: 1; /* Sticky footer: pushes footer down */
+  flex: 1;
 }
 
 .content-title {
@@ -163,7 +161,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Article Content Styles */
@@ -177,16 +177,6 @@
 
 .article-h2:first-child {
   margin-top: 0;
-}
-
-.article-p {
-  margin-bottom: 1.125rem;
-  color: #4a4a4a;
-  line-height: 1.75;
-}
-
-.article-p:last-child {
-  margin-bottom: 0;
 }
 
 .article-image-wrapper {
@@ -204,121 +194,116 @@
 }
 
 .article-richtext {
-    margin-bottom: 2rem;
-    color: #4a4a4a;
-    white-space: pre-wrap;
+  margin-bottom: 2rem;
+  color: #4a4a4a;
+  white-space: pre-wrap;
 }
 
-/* Support for Tiptap text-align */
 .article-richtext p {
-    margin-bottom: 1.125rem;
-    line-height: 1.75;
-    min-height: 1.75em;
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+  min-height: 1.75em;
 }
 
-/* Ensure empty paragraphs are visible but take less space */
 .article-richtext p:empty {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .article-richtext p:empty::before {
-    content: "\\00a0";
-    display: inline-block;
+  display: inline-block;
 }
 
 .article-richtext p[style*="text-align: center"],
 .article-richtext .text-center {
-    text-align: center !important;
+  text-align: center !important;
 }
 
 .article-richtext p[style*="text-align: right"],
 .article-richtext .text-right {
-    text-align: right !important;
+  text-align: right !important;
 }
 
 .article-richtext p[style*="text-align: justify"],
 .article-richtext .text-justify {
-    text-align: justify !important;
+  text-align: justify !important;
 }
 
 .article-richtext img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    display: inline-block; /* Ensure it respects text-align */
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 .article-richtext h2 {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
 .article-richtext h3 {
-     font-family: 'Source Sans 3', sans-serif;
-     font-size: 1.25rem;
-     font-weight: 600;
-     color: #1a1a1a;
-     margin-top: 1.5rem;
-     margin-bottom: 0.75rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .article-richtext ul {
-    list-style-type: disc;
-    padding-left: 3rem;
-    margin-bottom: 1rem;
+  list-style-type: disc;
+  padding-left: 3rem;
+  margin-bottom: 1rem;
 }
 
 .article-richtext ol {
-    list-style-type: decimal;
-    padding-left: 3rem;
-    margin-bottom: 0.5rem;
+  list-style-type: decimal;
+  padding-left: 3rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Nested List Styles */
 .article-richtext ul ul {
-    list-style-type: circle;
-    margin-bottom: 0;
-    margin-top: 0.25rem;
+  list-style-type: circle;
+  margin-bottom: 0;
+  margin-top: 0.25rem;
 }
 
 .article-richtext ul ul ul {
-    list-style-type: square;
+  list-style-type: square;
 }
 
 .article-richtext ol ol {
-    list-style-type: lower-alpha;
-    margin-bottom: 0;
-    margin-top: 0.25rem;
+  list-style-type: lower-alpha;
+  margin-bottom: 0;
+  margin-top: 0.25rem;
 }
 
 .article-richtext ol ol ol {
-    list-style-type: lower-roman;
+  list-style-type: lower-roman;
 }
 
-.article-richtext li {
-    margin-bottom: 0.75rem;
-}
+
 
 .article-richtext strong {
-    font-weight: 700;
+  font-weight: 700;
 }
 
 .article-richtext em {
-    font-style: italic;
+  font-style: italic;
 }
 
 .article-richtext u {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .article-richtext a {
-    color: #2563eb;
-    text-decoration: underline;
-    cursor: pointer;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* Mobile Menu Toggle */
