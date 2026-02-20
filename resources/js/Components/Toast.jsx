@@ -9,7 +9,7 @@ export default function Toast({ message, type, onClose }) {
 
     const handleClose = () => {
         setIsVisible(false);
-        setTimeout(onClose, 300); // Wait for fade out animation
+        setTimeout(onClose, 300);
     };
 
     const styles = {
@@ -45,8 +45,7 @@ export default function Toast({ message, type, onClose }) {
     return (
         <div
             className={`pointer-events-auto flex items-center px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
-                } ${styles[type] || styles.info}`}
-        >
+                } ${styles[type] || styles.info}`}>
             {icons[type]}
             <span className="font-medium mr-4">{message}</span>
             <button onClick={handleClose} className="opacity-75 hover:opacity-100 transition-opacity">

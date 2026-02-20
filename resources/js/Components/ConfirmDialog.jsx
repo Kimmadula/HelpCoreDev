@@ -8,13 +8,9 @@ export default function ConfirmDialog({
     message = "Are you sure you want to proceed?",
     confirmText = "Confirm",
     cancelText = "Cancel",
-    type = "danger" // danger | warning | info
+    type = "danger"
 }) {
     const isDanger = type === "danger";
-
-    // Use a simpler modal layout or reuse generic Modal
-    // For simplicity, let's reuse generic Modal but customize header colors if we want.
-    // Actually, let's just make a specific nice implementation since Verify used standard Modal.
 
     if (!isOpen) return null;
 
