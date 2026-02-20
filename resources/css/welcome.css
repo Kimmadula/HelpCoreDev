@@ -39,7 +39,6 @@
 }
 
 .hero-gradient {
-    /* Assuming the image path needs to be correct relative to where this CSS is imported or public path */
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/storage/background.jpg');
     background-size: cover;
     background-position: center;

@@ -33,7 +33,7 @@ function SearchIcon() {
 // Main Component
 export default function MainLanding() {
   const {
-    products, // This is filteredProducts from the hook
+    products, 
     loadingProducts,
     productsError,
     q,

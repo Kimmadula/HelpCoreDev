@@ -7,6 +7,7 @@ use App\Models\Subsection;
 use App\Models\PageBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class PageBlockController extends Controller
 {
@@ -51,6 +52,8 @@ class PageBlockController extends Controller
                 'order_index' => $maxOrder + 1,
             ]);
 
+            Cache::forget("help_subsection_{$subsection->id}");
+
             return response()->json($block, 201);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to create block', 'errors' => $e->getMessage()], 500);
@@ -72,6 +75,7 @@ class PageBlockController extends Controller
             ]);
 
             $block->update($validated);
+            Cache::forget("help_subsection_{$block->subsection_id}");
             return response()->json($block);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to update block', 'errors' => $e->getMessage()], 500);
@@ -81,7 +85,9 @@ class PageBlockController extends Controller
     public function destroy(PageBlock $block)
     {
         try {
+            $subsectionId = $block->subsection_id;
             $block->delete();
+            Cache::forget("help_subsection_{$subsectionId}");
             return response()->json(['message' => 'Deleted']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to delete block', 'errors' => $e->getMessage()], 500);
@@ -109,6 +115,8 @@ class PageBlockController extends Controller
                     PageBlock::where('id', $id)->update(['order_index' => $index + 1]);
                 }
             });
+
+            Cache::forget("help_subsection_{$subsection->id}");
 
             return response()->json(['message' => 'Reordered']);
         } catch (\Exception $e) {

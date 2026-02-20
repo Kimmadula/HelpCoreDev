@@ -14,13 +14,14 @@ export default function ProductCard({ product, index }) {
             style={{ animationDelay: `${index * 0.05}s` }}
         >
             <div className="glass-card relative p-6 rounded-xl h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                {/* Orange gradient accent on hover */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/20 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 {/* Icon */}
                 <div className="relative mb-4">
                     <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
-                        <ProductIcon className="text-white" />
+                        <span className="text-white font-bold text-lg">
+                            {product.name.charAt(0).toUpperCase()}
+                        </span>
                     </div>
                 </div>
 

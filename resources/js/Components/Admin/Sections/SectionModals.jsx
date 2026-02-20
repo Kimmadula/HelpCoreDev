@@ -1,11 +1,11 @@
 import Modal from "@/Components/Modal";
 
-export function CreateProductModal({ show, onClose, onCreate, name, setName, slug, setSlug, isPublished, setIsPublished }) {
+export function CreateSectionModal({ show, onClose, onCreate, title, setTitle, isPublished, setIsPublished }) {
     return (
         <Modal
             isOpen={show}
             onClose={onClose}
-            title="Create Product"
+            title="Create Section"
             footer={
                 <>
                     <button
@@ -19,39 +19,24 @@ export function CreateProductModal({ show, onClose, onCreate, name, setName, slu
                         onClick={onCreate}
                         className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
                     >
-                        Create
+                        Create Section
                     </button>
                 </>
             }
         >
             <div className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Product Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
-                            placeholder="Enter product name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Slug <span className="text-gray-400 text-xs font-normal">(optional)</span>
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm"
-                            placeholder="auto-generated from name"
-                            value={slug}
-                            onChange={(e) => setSlug(e.target.value)}
-                        />
-                    </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Section Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                        placeholder="Enter section title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
                 </div>
 
                 <div className="pt-2">
@@ -75,12 +60,12 @@ export function CreateProductModal({ show, onClose, onCreate, name, setName, slu
     );
 }
 
-export function EditProductModal({ show, onClose, onUpdate, editName, setEditName, editSlug, setEditSlug, editPublished, setEditPublished }) {
+export function EditSectionModal({ show, onClose, onUpdate, editTitle, setEditTitle, editPublished, setEditPublished }) {
     return (
         <Modal
             isOpen={show}
             onClose={onClose}
-            title="Edit Product"
+            title="Edit Section"
             footer={
                 <>
                     <button
@@ -102,26 +87,13 @@ export function EditProductModal({ show, onClose, onUpdate, editName, setEditNam
             <div className="space-y-5">
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Product Name <span className="text-red-500">*</span>
+                        Section Title <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-base"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Slug <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all font-mono text-sm"
-                        value={editSlug}
-                        onChange={(e) => setEditSlug(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-base"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
                         required
                     />
                 </div>

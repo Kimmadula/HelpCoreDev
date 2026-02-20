@@ -14,6 +14,7 @@ use App\Http\Requests\Admin\UpdateSubsectionRequest;
 use App\Http\Requests\Admin\ReorderRequest;
 use App\Http\Resources\SubsectionResource;
 use App\Services\SortingService;
+use Illuminate\Support\Facades\Cache;
 
 class SubsectionController extends Controller
 {
@@ -45,9 +46,10 @@ class SubsectionController extends Controller
                         'is_published' => $validated['is_published'] ?? true,
                     ]);
 
+                    Cache::forget("help_navigation_{$section->product->slug}");
+
                     return new SubsectionResource($subsection);
                 } catch (\Illuminate\Database\QueryException $e) {
-                    // MySQL error code for duplicate entry is 1062
                     if (($e->errorInfo[1] ?? 0) == 1062) {
                         $slug = $originalSlug . '-' . $i;
                         $i++;
@@ -81,6 +83,9 @@ class SubsectionController extends Controller
                 'is_published' => $validated['is_published'] ?? $subsection->is_published,
             ]);
 
+            Cache::forget("help_navigation_{$subsection->section->product->slug}");
+            Cache::forget("help_subsection_{$subsection->id}");
+
             return new SubsectionResource($subsection);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to update subsection', 'errors' => $e->getMessage()], 500);
@@ -90,7 +95,12 @@ class SubsectionController extends Controller
     public function destroy(Subsection $subsection)
     {
         try {
+            $productSlug = $subsection->section->product->slug;
             $subsection->delete();
+            
+            Cache::forget("help_navigation_{$productSlug}");
+            Cache::forget("help_subsection_{$subsection->id}");
+
             return response()->json(['message' => 'Deleted']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to delete subsection', 'errors' => $e->getMessage()], 500);
@@ -108,6 +118,9 @@ class SubsectionController extends Controller
                 'section_id',
                 $section->id
             );
+
+            Cache::forget("help_navigation_{$section->product->slug}");
+
             return response()->json(['message' => 'Reordered']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to reorder subsections', 'errors' => $e->getMessage()], 500);
