@@ -113,7 +113,6 @@ export default function ArticleRenderer({ blocks }) {
                     const cls = alignClass(b.align);
                     let content = b.text ?? "";
 
-                    // Auto-embed YouTube links
                     content = content.replace(/<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1[^>]*>.*?<\/a>/gi, (match, quote, url) => {
                         const ytId = getYouTubeId(url);
                         if (ytId) {

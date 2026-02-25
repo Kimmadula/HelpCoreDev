@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
 import ArticleRenderer from "@/Components/Article/ArticleRenderer";
 import ArticleSidebar from "@/Components/Article/ArticleSidebar";
+import TableOfContents from "@/Components/Article/TableOfContents";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
 import "../../css/HelpDocs.css";
 
@@ -14,6 +15,10 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Table of Contents state
+  const [toc, setToc] = useState([]);
+  const [activeTocId, setActiveTocId] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,6 +55,57 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
       .catch(console.error)
       .finally(() => setLoadingSubsection(false));
   }, [activeSubsectionId]);
+
+  // Extract headings for ToC
+  useEffect(() => {
+    if (!loadingSubsection && subsectionData) {
+      setTimeout(() => {
+        const container = document.querySelector('.content-body');
+        if (container) {
+          const headings = container.querySelectorAll('h2, h3');
+          const tocItems = [];
+          headings.forEach((heading, index) => {
+            const id = heading.id || `heading-${index}`;
+            if (!heading.id) heading.id = id;
+
+            // Add scroll margin so sticky header doesn't overlap
+            heading.style.scrollMarginTop = '80px';
+
+            tocItems.push({
+              id,
+              text: heading.innerText,
+              level: heading.tagName.toLowerCase() === 'h3' ? 3 : 2
+            });
+          });
+          setToc(tocItems);
+        }
+      }, 50);
+    } else {
+      setToc([]);
+    }
+  }, [loadingSubsection, subsectionData]);
+
+  // Highlight active ToC item
+  useEffect(() => {
+    if (toc.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          setActiveTocId(visible[0].target.id);
+        }
+      },
+      { rootMargin: "-80px 0px -80% 0px" }
+    );
+
+    const headings = document.querySelectorAll('.content-body h2, .content-body h3');
+    headings.forEach((h) => observer.observe(h));
+
+    return () => {
+      headings.forEach((h) => observer.unobserve(h));
+    };
+  }, [toc]);
 
   const handleSubsectionClick = (id) => {
     setActiveSubsectionId(id);
@@ -112,19 +168,23 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
             </div>
           </div>
 
-          <div className="content-body">
-            <h1 className="content-title">
-              {subsectionData?.title ?? ""}
-            </h1>
+          <div className="flex w-full items-start max-w-[1400px] mx-auto">
+            <div className="content-body flex-1 min-w-0">
+              <h1 className="content-title">
+                {subsectionData?.title ?? ""}
+              </h1>
 
-            {loadingSubsection ? (
-              <div className="loading-state">
-                <span className="loading-spinner"></span>
-                Loading content...
-              </div>
-            ) : (
-              <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
-            )}
+              {loadingSubsection ? (
+                <div className="loading-state">
+                  <span className="loading-spinner"></span>
+                  Loading content...
+                </div>
+              ) : (
+                <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
+              )}
+            </div>
+
+            <TableOfContents toc={toc} activeId={activeTocId} />
           </div>
 
           <ScrollToTopButton show={showScrollTop} onClick={scrollToTop} />
