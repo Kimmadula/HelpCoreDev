@@ -35,6 +35,7 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
             FontSize,
             textAlign.configure({
                 types: ['heading', 'paragraph'],
+                defaultAlignment: 'left',
             }),
             Image.configure({
                 inline: true,
@@ -86,7 +87,10 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
 
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value, false);
+            const currentSanitized = DOMPurify.sanitize(editor.getHTML());
+            if (value !== currentSanitized) {
+                editor.commands.setContent(value, false);
+            }
         }
     }, [editor, value]);
 

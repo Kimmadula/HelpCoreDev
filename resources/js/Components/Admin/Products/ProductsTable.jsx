@@ -1,3 +1,5 @@
+import TableSkeleton from "@/Components/Admin/TableSkeleton";
+
 export default function ProductsTable({ products, loading, onEdit, onDelete, onCreate }) {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -17,12 +19,7 @@ export default function ProductsTable({ products, loading, onEdit, onDelete, onC
                 </button>
             </div>
 
-            {loading ? (
-                <div className="p-12 text-center">
-                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
-                    <p className="mt-4 text-gray-600">Loading products...</p>
-                </div>
-            ) : products.length === 0 ? (
+            {!loading && products.length === 0 ? (
                 <div className="p-12 text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -50,7 +47,9 @@ export default function ProductsTable({ products, loading, onEdit, onDelete, onC
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {products.map((p) => (
+                            {loading ? (
+                                <TableSkeleton columns={4} rows={5} />
+                            ) : products.map((p) => (
                                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900">{p.name}</div>

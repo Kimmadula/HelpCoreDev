@@ -4,6 +4,7 @@ import ArticleRenderer from "@/Components/Article/ArticleRenderer";
 import ArticleSidebar from "@/Components/Article/ArticleSidebar";
 import TableOfContents from "@/Components/Article/TableOfContents";
 import ScrollToTopButton from "@/Components/ScrollToTopButton";
+import ArticleSkeleton from "@/Components/Article/ArticleSkeleton";
 import "../../css/HelpDocs.css";
 
 export default function HelpDocs({ productSlug = "help-desk" }) {
@@ -21,16 +22,22 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   const [activeTocId, setActiveTocId] = useState("");
 
   useEffect(() => {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent) return;
+
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
+      setShowScrollTop(mainContent.scrollTop > 300);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -68,7 +75,6 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
             const id = heading.id || `heading-${index}`;
             if (!heading.id) heading.id = id;
 
-            // Add scroll margin so sticky header doesn't overlap
             heading.style.scrollMarginTop = '80px';
 
             tocItems.push({
@@ -89,14 +95,23 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   useEffect(() => {
     if (toc.length === 0) return;
 
+    const mainContent = document.querySelector('.main-content');
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length > 0) {
-          setActiveTocId(visible[0].target.id);
+          if (mainContent && mainContent.clientHeight + mainContent.scrollTop >= mainContent.scrollHeight - 10) {
+            setActiveTocId(toc[toc.length - 1].id);
+          } else {
+            setActiveTocId(visible[0].target.id);
+          }
         }
       },
-      { rootMargin: "-80px 0px -80% 0px" }
+      {
+        root: mainContent,
+        rootMargin: "-80px 0px -40% 0px"
+      }
     );
 
     const headings = document.querySelectorAll('.content-body h2, .content-body h3');
@@ -115,6 +130,9 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   return (
     <>
       <Head title={nav?.name ? nav.name : "Knowledge Base"} />
+      <style>{`
+        body { margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+      `}</style>
 
       <div className="help-docs-container">
         {/* Mobile Menu Toggle */}
@@ -168,19 +186,17 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
             </div>
           </div>
 
-          <div className="flex w-full items-start max-w-[1400px] mx-auto">
+          <div className="flex flex-1 w-full items-start max-w-[1400px] mx-auto">
             <div className="content-body flex-1 min-w-0">
-              <h1 className="content-title">
-                {subsectionData?.title ?? ""}
-              </h1>
-
               {loadingSubsection ? (
-                <div className="loading-state">
-                  <span className="loading-spinner"></span>
-                  Loading content...
-                </div>
+                <ArticleSkeleton />
               ) : (
-                <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
+                <>
+                  <h1 className="content-title">
+                    {subsectionData?.title ?? ""}
+                  </h1>
+                  <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
+                </>
               )}
             </div>
 
@@ -208,7 +224,7 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
                     href="https://coredev.ph/"
                     target="_blank"
                     className="text-[#51bcda] hover:opacity-80">
-                    coredev Solutions Inc.
+                    coreDev Solutions Inc.
                   </a>
                 </div>
               </div>

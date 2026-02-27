@@ -77,7 +77,7 @@ export const IndentationExtension = Extension.create({
                 }
 
                 // Apply indent
-                if (targetNode && (['listItem', 'paragraph', 'heading'].includes(targetNode.type.name))) {
+                if (targetNode && (['listItem', 'heading'].includes(targetNode.type.name))) {
                     const currentIndent = targetNode.attrs.indent || 0;
                     const newIndent = Math.min(currentIndent + 20, 100); // Max 100px
 
@@ -88,7 +88,7 @@ export const IndentationExtension = Extension.create({
                     }
                 }
 
-                return this.editor.commands.insertContent('\t');
+                return this.editor.commands.insertContent('\u00A0\u00A0\u00A0\u00A0');
             },
             'Shift-Tab': () => {
                 if (this.editor.can().liftListItem('listItem')) {
@@ -118,7 +118,7 @@ export const IndentationExtension = Extension.create({
                 }
 
                 // Apply dedent
-                if (targetNode && (['listItem', 'paragraph', 'heading'].includes(targetNode.type.name))) {
+                if (targetNode && (['listItem', 'heading'].includes(targetNode.type.name))) {
                     const currentIndent = targetNode.attrs.indent || 0;
                     if (currentIndent > 0) {
                         const newIndent = Math.max(currentIndent - 20, 0);

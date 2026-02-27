@@ -33,7 +33,7 @@ function SearchIcon() {
 // Main Component
 export default function MainLanding() {
   const {
-    products, 
+    products,
     loadingProducts,
     productsError,
     q,
@@ -261,7 +261,7 @@ export default function MainLanding() {
                       margin: '0 2px'
                     }}
                   />
-                  coredev Solutions Inc.
+                  coreDev Solutions Inc.
                 </a>
               </div>
             </div>

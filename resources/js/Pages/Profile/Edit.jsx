@@ -17,28 +17,23 @@ export default function Edit({ mustVerifyEmail, status }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
-                    {/* Profile Information Card */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-6 sm:p-8">
-                            <UpdateProfileInformationForm
-                                mustVerifyEmail={mustVerifyEmail}
-                                status={status}
-                            />
-                        </div>
+                    {/* Profile Information */}
+                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        <UpdateProfileInformationForm
+                            mustVerifyEmail={mustVerifyEmail}
+                            status={status}
+                            className="max-w-xl"
+                        />
                     </div>
 
-                    {/* Update Password Card */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-6 sm:p-8">
-                            <UpdatePasswordForm />
-                        </div>
+                    {/* Update Password */}
+                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        <UpdatePasswordForm className="max-w-xl" />
                     </div>
 
-                    {/* Delete Account Card */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-6 sm:p-8">
-                            <DeleteUserForm />
-                        </div>
+                    {/* Delete Account */}
+                    <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        <DeleteUserForm className="max-w-xl" />
                     </div>
                 </div>
             </div>

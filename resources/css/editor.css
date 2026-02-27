@@ -93,3 +93,10 @@
 .article-richtext li {
     margin-bottom: 0.5em;
 }
+
+/* Hide trailing empty breaks inserted by ProseMirror */
+br.ProseMirror-trailingBreak,
+.article-richtext p:last-child:empty,
+.article-richtext p:last-child br.ProseMirror-trailingBreak {
+    display: none !important;
+}

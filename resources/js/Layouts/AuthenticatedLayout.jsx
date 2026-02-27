@@ -12,9 +12,9 @@ export default function AuthenticatedLayout({ header, children }) {
             if (saved !== null) {
                 return JSON.parse(saved);
             }
-            return window.innerWidth >= 1024; 
+            return window.innerWidth >= 1024;
         }
-        return false; 
+        return false;
     });
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function AuthenticatedLayout({ header, children }) {
     }, [showingSidebar]);
 
     return (
-        <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <div className="fixed inset-0 flex bg-gray-50 overflow-hidden">
 
             {/* Sidebar */}
             <aside
@@ -44,14 +44,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                             <span className="text-xl font-bold whitespace-nowrap">Knowledge Base</span>
 
-                            <button
-                                className="ml-auto lg:hidden text-gray-400 hover:text-white"
-                                onClick={() => setShowingSidebar(false)}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+
                         </div>
 
                         <nav className="space-y-2 flex-1">
@@ -108,9 +101,9 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300">
+            <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden transition-all duration-300">
                 {/* Header */}
-                <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+                <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0 z-10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <button

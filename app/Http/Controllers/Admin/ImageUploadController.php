@@ -13,23 +13,19 @@ class ImageUploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max, strict types
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
         ]);
 
         $file = $request->file('image');
         
-        // Generate new filename with .webp extension
         $filename = pathinfo($file->hashName(), PATHINFO_FILENAME) . '.webp';
         $path = 'help-images/' . $filename;
 
-        // Read and process the image
         $manager = new ImageManager(new Driver());
         $image = $manager->read($file);
         
-        // Encode to WebP format with 80% quality
         $encoded = $image->toWebp(80);
 
-        // Store the optimized WebP image
         Storage::disk('public')->put($path, (string) $encoded);
 
         return response()->json([
