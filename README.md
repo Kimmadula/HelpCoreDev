@@ -1,59 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Knowledge Base & Help Center CMS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive, full-stack Help Center and Knowledge Base built with Laravel, React, and Inertia.js. It features a beautiful, responsive public-facing documentation viewer and an advanced, secure Admin Panel with strict Role-Based Access Control (RBAC).
 
-## About Laravel
+## 🚀 Tech Stack
+* **Backend:** PHP 8.x, Laravel 11.x
+* **Frontend:** React, Inertia.js
+* **Styling:** Tailwind CSS, customized UI rendering
+* **Authentication/Security:** Laravel Breeze, Spatie Laravel Permissions
+* **Rich Text Editor:** Tiptap (Headless wrapper around ProseMirror)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Core Features
+* **Modern Public Viewer:** A highly responsive public Help Center with a dynamic collapsible sidebar, an automatic scroll-tracking Table of Contents, and instant search capabilities.
+* **Block-based CMS Architecture:** Articles are built sequentially using distinct "Blocks" (Headings, Paragraphs, Rich Text, Images, Lists). This guarantees structured, cleanly-styled data.
+* **Granular Role-Based Access Control (RBAC):** A closed registration system strictly controlled by Admins to ensure unauthorized users cannot compromise internal documentation.
+* **Drag-and-Drop Reordering:** Easily sort Products, Sections, and Subsections using an intuitive drag-and-drop hierarchy.
+* **Integrated Media Management:** Seamless image uploading embedded directly into the Rich Text Editor.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 👥 User Roles & Permissions
+The system runs on a strict internal hierarchy to prevent accidental deletions and secure sensitive data.
+* **👑 Super Admin:** Has absolute control. Can access the User Management dashboard, invite new staff, and edit or delete any data across the entire platform.
+* **📋 Manager:** The Editor-in-Chief. Can manage all content (Create, Edit, Reorder, Delete Products and Sections), but has NO access to the User Management dashboard.
+* **✍️ Writer:** The Content Creator. Can safely write and update text inside existing articles. They are actively prevented from deleting major structural categories (Products/Sections) or accessing User profiles to prevent catastrophic mistakes.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🛠 Installation & Setup
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone the repository and install dependencies:**
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Laravel Sponsors
+2. **Environment Setup:**
+   Copy the example `.env` file and generate an application key.
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Note: Ensure you update your database credentials in the `.env` file and set `CACHE_STORE=file`.*
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Migrate and Seed the Database:**
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+   *This command will build the exact database schema and automatically generate the Spatie Roles & Permissions, as well as three default testing accounts: `admin@example.com`, `manager@example.com`, and `writer@example.com` (password: `password`).*
 
-### Premium Partners
+4. **Compile Frontend & Start Local Server:**
+   ```bash
+   npm run dev
+   php artisan serve
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 📚 How to Use the Admin Panel
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Provisioning Accounts
+Only **Super Admins** can invite staff. Public registration is intentionally disabled. 
+Navigate to the **USERS** tab on the sidebar to create an account, assign a role (Manager or Writer), and set an initial password.
 
-## Code of Conduct
+### 2. Structuring Your Documentation
+The Knowledge Base follows a strict 3-tier hierarchy:
+* **Products:** The top-level category (e.g., *IT Help Desk*, *HR Portal*).
+* **Sections:** The broad topics inside a product (e.g., *Getting Started*, *Troubleshooting*).
+* **Subsections (Articles):** The actual, readable pages inside a section.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Writing Content (The Block Editor)
+Clicking into a Subsection opens the actual Content Editor. You can add distinct blocks to your page:
+* **Rich Text Blocks:** Use this for 90% of your writing. It includes a full toolbar for Bold, Links, Bullet Points, and Inline Images. 
+* **Dedicated Blocks:** You can intentionally inject standalone Image Blocks, List Blocks, or Heading Blocks to force specific, unbreakable formatting.
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Rich Text Editor Tip:** 
+When typing in the Rich Text Editor, pressing **`Enter`** creates an entirely new text block (a visual paragraph jump). To drop to the immediate next line without a large gap, hold **`Shift+Enter`**.
