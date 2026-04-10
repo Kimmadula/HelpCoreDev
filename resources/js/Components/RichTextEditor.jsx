@@ -34,11 +34,14 @@ export default function RichTextEditor({ value, onChange, onSave, isSaving, isDi
             FontFamily,
             FontSize,
             textAlign.configure({
-                types: ['heading', 'paragraph'],
+                types: ['heading', 'paragraph', 'image'],
                 defaultAlignment: 'left',
             }),
             Image.configure({
-                inline: true,
+                inline: false,
+                HTMLAttributes: {
+                    class: 'block-image',
+                },
             }),
             Link.configure({
                 openOnClick: false,

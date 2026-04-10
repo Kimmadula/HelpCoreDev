@@ -5,6 +5,14 @@ import Dropdown from '@/Components/Dropdown';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+    const permissions = usePage().props.auth.permissions || [];
+    const roles = usePage().props.auth.roles || [];
+    const canManageUsers = permissions.includes('manage users');
+    
+    // Capitalize the first letter of the primary role, or default to User
+    const displayRole = roles.length > 0 
+        ? roles[0].charAt(0).toUpperCase() + roles[0].slice(1) 
+        : 'User';
 
     const [showingSidebar, setShowingSidebar] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -61,18 +69,20 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <span className="text-sm font-medium">PRODUCTS</span>
                             </Link>
 
-                            <Link
-                                href={route('admin.users') || '/admin/users'}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${route().current('admin.users')
-                                    ? 'bg-slate-700 text-white'
-                                    : 'text-gray-300 hover:bg-slate-700'
-                                    }`}
-                            >
-                                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <span className="text-sm font-medium">USERS</span>
-                            </Link>
+                            {canManageUsers && (
+                                <Link
+                                    href={route('admin.users') || '/admin/users'}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors whitespace-nowrap ${route().current('admin.users')
+                                        ? 'bg-slate-700 text-white'
+                                        : 'text-gray-300 hover:bg-slate-700'
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span className="text-sm font-medium">USERS</span>
+                                </Link>
+                            )}
                         </nav>
                     </div>
 
@@ -125,7 +135,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="flex items-center gap-3">
                                 <div className="text-right hidden sm:block">
                                     <div className="text-sm font-semibold text-gray-900">{user.name}</div>
-                                    <div className="text-xs text-gray-500">Administrator</div>
+                                    <div className="text-xs text-gray-500">{displayRole}</div>
                                 </div>
                                 <Link
                                     href={route('profile.edit')}

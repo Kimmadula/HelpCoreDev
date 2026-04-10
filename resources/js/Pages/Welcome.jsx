@@ -139,6 +139,7 @@ export default function MainLanding() {
                         >
                           <SearchSuggestionItem
                             result={result}
+                            query={q}
                             onNavigate={() => setShowSuggestions(false)}
                           />
                         </div>

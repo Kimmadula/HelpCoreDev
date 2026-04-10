@@ -13,13 +13,29 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   const [activeSubsectionId, setActiveSubsectionId] = useState(null);
   const [subsectionData, setSubsectionData] = useState(null);
   const [loadingSubsection, setLoadingSubsection] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+      if (typeof window !== 'undefined') {
+          return window.innerWidth > 768;
+      }
+      return false;
+  });
 
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Table of Contents state
   const [toc, setToc] = useState([]);
   const [activeTocId, setActiveTocId] = useState("");
+
+  const [currentHighlight, setCurrentHighlight] = useState(() => {
+      if (typeof window !== 'undefined') {
+          const stored = sessionStorage.getItem('searchHighlight');
+          if (stored) {
+              sessionStorage.removeItem('searchHighlight');
+              return stored;
+          }
+      }
+      return null;
+  });
 
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
@@ -41,13 +57,20 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
   };
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const subIdFromUrl = urlParams.get('subsection');
+
     fetch(`/api/help/${productSlug}/nav`)
       .then((r) => r.json())
       .then((data) => {
         setNav(data);
-        const firstSection = data.sections?.[0];
-        const firstSub = firstSection?.subsections?.[0];
-        if (firstSub?.id) setActiveSubsectionId(firstSub.id);
+        if (subIdFromUrl) {
+          setActiveSubsectionId(parseInt(subIdFromUrl));
+        } else {
+          const firstSection = data.sections?.[0];
+          const firstSub = firstSection?.subsections?.[0];
+          if (firstSub?.id) setActiveSubsectionId(firstSub.id);
+        }
       })
       .catch(console.error);
   }, [productSlug]);
@@ -91,6 +114,38 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
     }
   }, [loadingSubsection, subsectionData]);
 
+  // Highlight scroll and auto-clear
+  useEffect(() => {
+      if (currentHighlight && !loadingSubsection && subsectionData?.blocks) {
+          // Scroll to the highlight element
+          const highlightTimer = setTimeout(() => {
+              const mark = document.querySelector('mark');
+              if (mark) {
+                  mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+          }, 300); // 300ms to allow rendering
+
+          // Clear highlight on interaction
+          const clearHighlight = () => {
+              setCurrentHighlight(null);
+          };
+
+          const attachTimer = setTimeout(() => {
+              document.addEventListener('mousedown', clearHighlight, { once: true });
+              document.addEventListener('keydown', clearHighlight, { once: true });
+              document.addEventListener('touchstart', clearHighlight, { once: true });
+          }, 1000);
+
+          return () => {
+              clearTimeout(highlightTimer);
+              clearTimeout(attachTimer);
+              document.removeEventListener('mousedown', clearHighlight);
+              document.removeEventListener('keydown', clearHighlight);
+              document.removeEventListener('touchstart', clearHighlight);
+          };
+      }
+  }, [currentHighlight, loadingSubsection, subsectionData]);
+
   // Highlight active ToC item
   useEffect(() => {
     if (toc.length === 0) return;
@@ -124,7 +179,9 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
 
   const handleSubsectionClick = (id) => {
     setActiveSubsectionId(id);
-    setSidebarOpen(false);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
   };
 
   return (
@@ -132,6 +189,10 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
       <Head title={nav?.name ? nav.name : "Knowledge Base"} />
       <style>{`
         body { margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        
+        mark {
+          transition: background-color 1s ease-in-out;
+        }
       `}</style>
 
       <div className="help-docs-container">
@@ -151,7 +212,9 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         {/* Sidebar Overlay for Mobile */}
         <div
           className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => {
+            if (window.innerWidth <= 768) setSidebarOpen(false);
+          }}
         ></div>
 
         {/* Sidebar */}
@@ -165,7 +228,19 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
         {/* Main Content */}
         <main className="main-content">
           <div className="content-header">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4 flex-1">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="hidden md:flex items-center justify-center p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors mr-auto"
+                title="Toggle Sidebar"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+              
               <select
                 className="bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#FF6C00] focus:border-transparent cursor-pointer hover:bg-white/20 transition"
                 value={nav?.id || ""}
@@ -195,7 +270,10 @@ export default function HelpDocs({ productSlug = "help-desk" }) {
                   <h1 className="content-title">
                     {subsectionData?.title ?? ""}
                   </h1>
-                  <ArticleRenderer blocks={subsectionData?.blocks ?? []} />
+                  <ArticleRenderer 
+                    blocks={subsectionData?.blocks ?? []} 
+                    highlight={currentHighlight}
+                  />
                 </>
               )}
             </div>

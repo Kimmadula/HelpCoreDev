@@ -1,4 +1,4 @@
-export default function SearchSuggestionItem({ result, onNavigate }) {
+export default function SearchSuggestionItem({ result, onNavigate, query }) {
     const iconConfig = {
         product: {
             bgColor: "bg-orange-100",
@@ -42,10 +42,28 @@ export default function SearchSuggestionItem({ result, onNavigate }) {
 
     const config = iconConfig[result.type] || iconConfig.subsection;
 
+    const highlightText = (text, highlight) => {
+        if (!highlight || !text) return text;
+        const sanitizedTerm = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const parts = text.split(new RegExp(`(${sanitizedTerm})`, 'gi'));
+        return parts.map((part, index) => 
+            part.toLowerCase() === highlight.toLowerCase() 
+                ? <strong key={index} className="text-gray-900 font-normal" style={{ backgroundColor: '#ffdf00', padding: '2px 0' }}>{part}</strong> 
+                : part
+        );
+    };
+
+    const destUrl = result.url;
+
     return (
         <a
-            href={result.url}
-            onClick={onNavigate}
+            href={destUrl}
+            onClick={(e) => {
+                if (query && result.type === 'subsection') {
+                    sessionStorage.setItem('searchHighlight', query);
+                }
+                if (onNavigate) onNavigate();
+            }}
             className="flex items-center gap-4 px-6 py-4 hover:bg-orange-50 transition-colors border-b border-gray-50 last:border-0 group/item"
             role="option"
         >
@@ -59,11 +77,16 @@ export default function SearchSuggestionItem({ result, onNavigate }) {
                     </span>
                 </div>
                 <div className="font-medium text-gray-900 group-hover/item:text-orange-600 transition-colors truncate">
-                    {result.title}
+                    {highlightText(result.title, query)}
                 </div>
                 {(result.type === 'subsection' || result.type === 'section') && (
                     <div className="text-xs text-gray-500 mt-0.5 truncate">
                         in {result.product_name}
+                    </div>
+                )}
+                {result.snippet && (
+                    <div className="text-xs text-gray-500 mt-1 italic line-clamp-2">
+                        "{highlightText(result.snippet, query)}"
                     </div>
                 )}
             </div>

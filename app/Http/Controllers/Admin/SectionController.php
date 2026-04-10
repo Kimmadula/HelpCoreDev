@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\ReorderRequest;
 use App\Services\SortingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class SectionController extends Controller

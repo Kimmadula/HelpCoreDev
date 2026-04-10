@@ -42,25 +42,17 @@ use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\SubsectionController;
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
-    Route::get('/products', [ProductController::class, 'index'])->name('admin.products'); // Although index returns JSON resource in controller, the frontend expects Inertia page. Wait, ProductController::index returns JSON. The original code was `fn () => Inertia::render('Admin/ProductsIndex')`. Let's keep `products` as is for now if ProductController::index is API.
+    Route::get('/products', fn () => Inertia::render('Admin/ProductsIndex'))->name('admin.products')->middleware('permission:manage content');
 
-    // Correction: The original code had `fn () => Inertia::render('Admin/ProductsIndex')` for `/products`. 
-    // And ProductController::index returns `ProductResource::collection`. 
-    // So `/products` serves the page, and the page calls API to get data. 
-    // I should NOT change `/products` to point to `ProductController::index` because that returns JSON.
-    // The user request specifically mentioned lines 46-52, 54-63, 65-77.
-    
-    Route::get('/products', fn () => Inertia::render('Admin/ProductsIndex'))->name('admin.products');
+    Route::get('/products/{product}/sections', [ProductController::class, 'showSections'])->name('admin.sections')->middleware('permission:manage content');
 
-    Route::get('/products/{product}/sections', [ProductController::class, 'showSections'])->name('admin.sections');
+    Route::get('/sections/{section}/subsections', [SectionController::class, 'showSubsections'])->name('admin.subsections')->middleware('permission:manage content');
 
-    Route::get('/sections/{section}/subsections', [SectionController::class, 'showSubsections'])->name('admin.subsections');
-
-    Route::get('/subsections/{subsection}/edit', [SubsectionController::class, 'edit'])->name('admin.subsection.edit');
+    Route::get('/subsections/{subsection}/edit', [SubsectionController::class, 'edit'])->name('admin.subsection.edit')->middleware('permission:manage content');
 
     Route::get('/users', function () {
         return Inertia::render('Admin/UsersIndex');
-    })->name('admin.users');
+    })->name('admin.users')->middleware('permission:manage users');
 });
 
 

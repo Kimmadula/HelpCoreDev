@@ -46,7 +46,7 @@ export function CreateProductModal({ show, onClose, onCreate, name, setName, slu
                         </label>
                         <input
                             type="text"
-                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm"
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
                             placeholder="auto-generated from name"
                             value={slug}
                             onChange={(e) => setSlug(e.target.value)}
@@ -119,7 +119,7 @@ export function EditProductModal({ show, onClose, onUpdate, editName, setEditNam
                     </label>
                     <input
                         type="text"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all font-mono text-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-base"
                         value={editSlug}
                         onChange={(e) => setEditSlug(e.target.value)}
                         required

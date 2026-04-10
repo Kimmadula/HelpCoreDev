@@ -73,6 +73,7 @@
 }
 
 /* Article Renderer Styles */
+
 .article-richtext li p {
     margin-bottom: 0;
     margin-top: 0;
@@ -94,9 +95,55 @@
     margin-bottom: 0.5em;
 }
 
-/* Hide trailing empty breaks inserted by ProseMirror */
-br.ProseMirror-trailingBreak,
+/* Hide trailing empty breaks only at the end of the rendered article */
 .article-richtext p:last-child:empty,
 .article-richtext p:last-child br.ProseMirror-trailingBreak {
     display: none !important;
+}
+
+/* Fix for inline images inside aligned paragraphs */
+.ProseMirror p[style*="text-align: center"] img,
+.article-richtext p[style*="text-align: center"] img,
+.text-center img {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+}
+
+.ProseMirror p[style*="text-align: right"] img,
+.article-richtext p[style*="text-align: right"] img,
+.text-right img {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    display: block !important;
+}
+
+.ProseMirror p[style*="text-align: left"] img,
+.article-richtext p[style*="text-align: left"] img,
+.text-left img {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    display: block !important;
+}
+
+/* Fix for block images inside Editor */
+img.block-image[style*="text-align: center"],
+.article-richtext img[style*="text-align: center"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+}
+
+img.block-image[style*="text-align: right"],
+.article-richtext img[style*="text-align: right"] {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    display: block !important;
+}
+
+img.block-image[style*="text-align: left"],
+.article-richtext img[style*="text-align: left"] {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    display: block !important;
 }

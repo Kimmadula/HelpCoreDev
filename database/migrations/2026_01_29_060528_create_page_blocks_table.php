@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('page_blocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('page_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subsection_id')->constrained('subsections')->cascadeOnDelete();
 
             $table->string('type');
 
@@ -21,6 +21,11 @@ return new class extends Migration
             $table->string('image_path')->nullable();
 
             $table->unsignedInteger('order_index')->default(0);
+
+            $table->string('align')->nullable();
+            $table->string('image_width')->nullable();
+            $table->string('list_style')->nullable();
+            $table->json('list_items')->nullable();
 
             $table->timestamps();
         });

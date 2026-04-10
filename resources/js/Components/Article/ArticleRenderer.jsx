@@ -1,8 +1,31 @@
+import React, { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import { alignClass, imageAlignStyle, getYouTubeId, getImageUrl } from "@/Utils/articleContent";
 import '../../../css/editor.css';
 
-export default function ArticleRenderer({ blocks }) {
+const ArticleRenderer = memo(({ blocks, highlight }) => {
+    
+    // Highlight helper for simple text
+    const applyHighlightNodes = (text, term) => {
+        if (!term || !text) return text;
+        const sanitizedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const parts = text.split(new RegExp(`(${sanitizedTerm})`, 'gi'));
+        return parts.map((part, index) => 
+            part.toLowerCase() === term.toLowerCase() 
+                ? <mark key={index} className="text-gray-900" style={{ backgroundColor: '#ffdf00', padding: '2px 0' }}>{part}</mark> 
+                : part
+        );
+    };
+
+    // Highlight helper for HTML strings
+    const applyHighlightHTML = (html, term) => {
+        if (!term || !html) return html;
+        const sanitizedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Matches the term when it is NOT inside an HTML tag
+        const regex = new RegExp(`(?![^<]*>)(${sanitizedTerm})`, 'gi');
+        return html.replace(regex, `<mark class="text-gray-900" style="background-color: #ffdf00; padding: 2px 0;">$1</mark>`);
+    };
+
     if (!blocks?.length) {
         return (
             <div className="text-gray-500 italic py-8 text-center">
@@ -22,13 +45,13 @@ export default function ArticleRenderer({ blocks }) {
                     if (b.heading_level === 3) {
                         return (
                             <h3 key={b.id} className={`article-h3 ${cls}`} style={style}>
-                                {b.text}
+                                {applyHighlightNodes(b.text, highlight)}
                             </h3>
                         );
                     }
                     return (
                         <h2 key={b.id} className={`article-h2 ${cls}`} style={style}>
-                            {b.text}
+                            {applyHighlightNodes(b.text, highlight)}
                         </h2>
                     );
                 }
@@ -57,9 +80,20 @@ export default function ArticleRenderer({ blocks }) {
 
                     const style = { textAlign: b.align };
 
+                    // Pre-highlight text (note: Markdown might be affected if we use <mark>, but simple paragraph text is usually fine)
+                    let pContent = b.text ?? "";
+                    if (highlight) pContent = applyHighlightHTML(pContent, highlight);
+
                     return (
                         <div key={b.id} className={`article-p ${cls}`} style={style}>
-                            <ReactMarkdown>{b.text ?? ""}</ReactMarkdown>
+                            <ReactMarkdown
+                                components={{
+                                    // Custom components mapped to render standard HTML so we can parse <mark>
+                                    p: ({node, children}) => <p dangerouslySetInnerHTML={{ __html: pContent }} />
+                                }}
+                            >
+                                {b.text ?? ""}
+                            </ReactMarkdown>
                         </div>
                     );
                 }
@@ -73,7 +107,7 @@ export default function ArticleRenderer({ blocks }) {
                         return (
                             <ol key={b.id} className={`${cls} list-decimal pl-6 mb-4`}>
                                 {items.map((it, i) => (
-                                    <li key={i}>{it}</li>
+                                    <li key={i}>{applyHighlightNodes(it, highlight)}</li>
                                 ))}
                             </ol>
                         );
@@ -82,7 +116,7 @@ export default function ArticleRenderer({ blocks }) {
                     return (
                         <ul key={b.id} className={`${cls} list-disc pl-6 mb-4`}>
                             {items.map((it, i) => (
-                                <li key={i}>{it}</li>
+                                <li key={i}>{applyHighlightNodes(it, highlight)}</li>
                             ))}
                         </ul>
                     );
@@ -130,6 +164,9 @@ export default function ArticleRenderer({ blocks }) {
                         return match;
                     });
 
+                    // Apply text highlight if any
+                    content = applyHighlightHTML(content, highlight);
+
                     return (
                         <div
                             key={b.id}
@@ -143,4 +180,6 @@ export default function ArticleRenderer({ blocks }) {
             })}
         </div>
     );
-}
+});
+
+export default ArticleRenderer;
