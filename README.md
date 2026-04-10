@@ -54,6 +54,12 @@ The system runs on a strict internal hierarchy to prevent accidental deletions a
    php artisan serve
    ```
 
+### Default Test Accounts
+After running the seeder, the following test accounts are automatically generated so you can explore the different Role views:
+* **Super Admin:** `admin@example.com` | Password: `password`
+* **Manager:** `manager@example.com` | Password: `password`
+* **Writer:** `writer@example.com` | Password: `password`
+
 ---
 
 ## 📚 How to Use the Admin Panel
